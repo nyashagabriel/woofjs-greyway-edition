@@ -1,9 +1,13 @@
 /* ============================================================
    WoofJS Greyway Edition — Docs Panel Theme
-   Inherits all variables from vivid-theme.css (loaded first).
-   This file applies them to the docs iframe context.
+   Inherits variables from vivid-theme.css (loaded first).
+   
+   STRUCTURE:
+     Home view  → 2-column grid of individual category cards
+     Detail view → single-column expanded content
    ============================================================ */
 
+/* ---- Base ---- */
 html, body {
   margin: 0;
   min-height: 100%;
@@ -14,38 +18,78 @@ html, body {
 
 #body { padding-top: 0; }
 
-/* ---- Search bar ---- */
+/* ============================================================
+   DOCUMENTATION title bar
+   ============================================================ */
+.docs-title {
+  text-align: center;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text);
+  padding: 14px 0 8px;
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* ============================================================
+   Search bar — sticky below title
+   ============================================================ */
 div.search {
-  background: rgba(11, 16, 32, 0.92) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px;
+  background: rgba(11, 16, 32, 0.95) !important;
   border-bottom: 1px solid var(--border) !important;
   backdrop-filter: blur(16px);
-  box-shadow: 0 10px 30px rgba(3, 8, 18, 0.4);
-  padding: 8px 12px !important;
+  padding: 8px 14px !important;
   position: sticky !important;
   top: 0;
-  z-index: 10;
+  z-index: 15;
+  width: 100% !important;
+  left: auto !important;
+  margin: 0 !important;
+  border-width: 0 0 1px 0 !important;
+  border-color: var(--border) !important;
+  border-style: solid !important;
+  box-shadow: 0 8px 24px rgba(3, 8, 18, 0.35);
 }
 
 #searchbar {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 13px;
-  padding: 6px 10px;
-  height: 34px;
-  border-radius: var(--radius-sm);
+  flex: 1;
+  background: var(--panel-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  font-size: 13px !important;
+  padding: 7px 12px !important;
+  height: 36px !important;
+  border-radius: var(--radius-sm) !important;
+  outline: none !important;
 }
 #searchbar::placeholder { color: var(--muted); }
-#searchbar:focus {
-  border-color: var(--accent-2);
-  outline: none;
-}
+#searchbar:focus { border-color: var(--accent-2) !important; }
 
-div.space-holder {
-  display: none !important;
-  height: 0 !important;
+.search-clear {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 36px;
+  padding: 0 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 150ms ease;
 }
+.search-clear:hover { color: var(--danger); }
+
+div.space-holder { display: none !important; height: 0 !important; }
 
 /* ---- Back button ---- */
 #back {
@@ -53,187 +97,226 @@ div.space-holder {
   border: 1px solid rgba(59, 212, 182, 0.35) !important;
   color: var(--text) !important;
   border-radius: var(--radius-sm) !important;
-  height: 34px !important;
-  padding: 0 12px !important;
+  height: 36px !important;
+  padding: 0 14px !important;
   font-size: 12px !important;
   font-family: var(--font);
   letter-spacing: 0.04em;
+  flex-shrink: 0;
   transition: all 150ms ease;
+  line-height: 36px !important;
+  box-shadow: none !important;
 }
-#back:hover {
-  background: rgba(59, 212, 182, 0.25) !important;
+#back:hover { background: rgba(59, 212, 182, 0.25) !important; }
+
+/* ============================================================
+   HOME VIEW — 2-column grid of individual cards
+   ============================================================ */
+#menus {
+  padding: 14px !important;
 }
 
-/* ---- Category buttons ---- */
+#menus.menus-home {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  align-content: start;
+}
+
+/* Search bar spans full width in grid */
+#menus.menus-home > .search {
+  grid-column: 1 / -1;
+}
+#menus.menus-home > .space-holder {
+  grid-column: 1 / -1;
+}
+
+/* ---- Individual category cards (home) ---- */
+.menu-card {
+  display: flex;
+  flex-direction: column;
+}
+
+#menus.menus-home .menu-card {
+  min-height: 0;
+}
+
+/* ---- DETAIL VIEW — single column ---- */
+#menus.menus-detail {
+  display: flex;
+  flex-direction: column;
+}
+#menus.menus-detail .menu-card {
+  width: 100%;
+}
+
+/* ============================================================
+   Category buttons — the tiles
+   ============================================================ */
 .all {
   border-radius: var(--radius-md) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: none;
-  font-family: var(--font);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(3, 8, 18, 0.25);
+  font-family: var(--font) !important;
   font-size: 14px !important;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 10px 12px !important;
-  line-height: 1.2;
-  transition: transform 100ms ease, border-color 150ms ease;
+  color: #fff !important;
+  padding: 0 12px !important;
+  height: 54px !important;
+  line-height: 54px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100% !important;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  flex: none;
 }
 .all:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(3, 8, 18, 0.4);
+}
+.all:active {
+  transform: translateY(0);
 }
 
-button.all { margin-bottom: 8px !important; }
-
-/* Greyway standardized sizing */
-.greyway .all {
-  border-radius: var(--radius-md) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  font-size: 14px !important;
-  padding: 10px 12px !important;
-  height: 44px !important;
-  line-height: 22px !important;
+button.all {
+  margin-bottom: 0 !important;
 }
+button.highlight:focus { outline: none; }
+button.highlight:hover { opacity: 1 !important; }
 
-/* ---- Block list ---- */
-.list {
-  color: var(--muted);
-  font-family: var(--font);
-}
-
-.greyway .list { color: var(--muted); }
-
-/* ---- Individual blocks ---- */
-.block {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  box-shadow: 0 8px 20px rgba(3, 8, 18, 0.3);
-  margin-bottom: 10px;
-}
-
-/* ---- Menu headers ---- */
+/* ============================================================
+   Menu headers (shown when a category is open)
+   ============================================================ */
 .menu-header {
-  margin: 10px 0 8px;
-  padding: 8px 12px;
+  margin: 0 0 10px;
+  padding: 10px 14px;
   min-height: 44px;
   display: flex;
   align-items: center;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--panel);
   border: 1px solid var(--border);
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--font);
-  letter-spacing: 0.02em;
+  font-size: 15px;
+  letter-spacing: 0.03em;
 }
 .menu-header.pinned {
   position: sticky;
-  top: 50px;
+  top: 0;
   z-index: 5;
   backdrop-filter: blur(12px);
 }
 
+/* Integrations header — crimson banner */
+.menu-header.integrations-header {
+  background: linear-gradient(135deg, #c0392b, #8e1e1e) !important;
+  border: 1px solid rgba(192, 57, 43, 0.45) !important;
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
 .menu-subheader {
   margin: 8px 0 6px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   min-height: 40px;
   display: flex;
   align-items: center;
   border-radius: var(--radius-sm);
-  background: rgba(18, 27, 47, 0.55);
+  background: rgba(18, 27, 47, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--muted);
   font-weight: 600;
   font-size: 13px;
 }
 
-/* ---- Integrations grid ---- */
+/* ============================================================
+   Integrations sub-grid (when Integrations is open)
+   ============================================================ */
 .menu-grid {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   align-content: start;
 }
 .menu-grid-item { margin: 0 !important; }
 .menu-grid .all {
-  height: 56px !important;
-  width: 100% !important;
-  border-radius: var(--radius-md) !important;
+  height: 60px !important;
+  line-height: 1.3 !important;
   font-size: 13px !important;
   padding: 8px 10px !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  line-height: 1.25 !important;
+  white-space: normal;
 }
 
-#menus { padding: 10px 12px 16px !important; }
-
-/* ---- DOCUMENTATION title ---- */
-.docs-title {
-  text-align: center;
-  font-family: var(--font);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text);
-  padding: 14px 0 6px;
-  background: var(--bg-0);
-}
-
-/* ---- Search clear X button ---- */
-.search-clear {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 22px;
-  line-height: 34px;
-  padding: 0 10px;
-  cursor: pointer;
-  transition: color 150ms ease;
-}
-.search-clear:hover {
-  color: var(--danger);
-}
-
-/* ---- Integrations header — crimson ---- */
-.menu-header.integrations-header {
-  background: linear-gradient(135deg, #c0392b, #96281b) !important;
-  border: 1px solid rgba(192, 57, 43, 0.5) !important;
-  color: #fff !important;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-/* ---- Integrations sub-buttons — unified vibrant purple ---- */
+/* Unified purple for all integration sub-buttons */
 .menu-grid .all,
 #Weather, #Sunrise, #Local, #Currency, #Scientific, #Trivia,
 #Chuck, #Firebase, #Custom, #Trig {
   background: linear-gradient(135deg, #7c5cbf, #6a3fbf) !important;
-  border: 1px solid rgba(140, 100, 220, 0.3) !important;
-  color: #fff !important;
+  border-color: rgba(140, 100, 220, 0.25) !important;
 }
 
-/* ---- Code blocks ---- */
+/* ============================================================
+   Block list / content area
+   ============================================================ */
+.list {
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 10px;
+  display: block;
+  max-width: 100%;
+}
+
+/* ---- Individual content blocks ---- */
+.block {
+  position: relative;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px rgba(3, 8, 18, 0.25);
+  margin-bottom: 12px;
+  margin-right: 0;
+}
+
+/* ============================================================
+   Code blocks
+   ============================================================ */
 pre, code, pre.language-javascript, :not(pre) > code {
-  background: rgba(11, 16, 32, 0.9) !important;
+  background: rgba(11, 16, 32, 0.92) !important;
   color: var(--text) !important;
+  text-shadow: none !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius-sm);
   font-family: Consolas, Monaco, 'Andale Mono', monospace;
 }
-pre { padding: 14px 18px !important; }
+pre {
+  padding: 14px 18px !important;
+  padding-right: 18px !important;
+}
 
 /* ---- Copy button ---- */
 .btn-clipboard {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  display: block;
+  padding: 6px 10px;
+  font-size: 11px;
+  cursor: pointer;
   background: var(--panel) !important;
   border: 1px solid var(--border) !important;
   color: var(--muted) !important;
   border-radius: 0 var(--radius-sm) 0 var(--radius-sm) !important;
   font-family: var(--font);
-  font-size: 11px;
   letter-spacing: 0.04em;
   transition: all 150ms ease;
 }
@@ -243,7 +326,9 @@ pre { padding: 14px 18px !important; }
   border-color: rgba(59, 212, 182, 0.35) !important;
 }
 
-/* ---- Alerts ---- */
+/* ============================================================
+   Alerts
+   ============================================================ */
 .alert {
   background: var(--panel) !important;
   border: 1px solid var(--border) !important;
@@ -251,24 +336,43 @@ pre { padding: 14px 18px !important; }
   border-radius: var(--radius-sm);
 }
 
-/* ---- Links ---- */
+/* ============================================================
+   Links
+   ============================================================ */
 a { color: #7dd3fc; }
 
-/* ---- Syntax highlighting (dark) ---- */
+/* ============================================================
+   Syntax highlighting (dark palette)
+   ============================================================ */
 .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6b7fa0; }
 .token.punctuation { color: #8694b8; }
-.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #f0a0a0; }
-.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #7ee787; }
-.token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string { color: #d2a8ff; background: none; }
+.token.property, .token.tag, .token.boolean, .token.number,
+.token.constant, .token.symbol, .token.deleted { color: #f0a0a0; }
+.token.selector, .token.attr-name, .token.string, .token.char,
+.token.builtin, .token.inserted { color: #7ee787; }
+.token.operator, .token.entity, .token.url,
+.language-css .token.string, .style .token.string { color: #d2a8ff; background: none; }
 .token.atrule, .token.attr-value, .token.keyword { color: #79c0ff; }
 .token.function { color: #d2a8ff; }
 .token.regex, .token.important, .token.variable { color: var(--accent-3); }
 
-/* ---- Scrollbar ---- */
+/* ============================================================
+   Images
+   ============================================================ */
+img { max-width: 100%; border-radius: var(--radius-sm); }
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(120, 140, 190, 0.25);
+  background: rgba(120, 140, 190, 0.2);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(120, 140, 190, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(120, 140, 190, 0.35); }
+
+/* ============================================================
+   Play-sound buttons
+   ============================================================ */
+.play-sound { display: inline; cursor: pointer; }

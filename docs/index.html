@@ -16,7 +16,7 @@
 <body>
     <div id="body">
         <div class="docs-title">DOCUMENTATION</div>
-        <div :style="menuStyles" id="menus">
+        <div id="menus" :class="{'menus-home': !open && !search, 'menus-detail': open || search}">
         <div class="btn-group search">
                 <button v-show="open != undefined || search != ''" @click="search = ''; open = undefined" id="back" class="highlight btn btn-medium btn-info">Back</button>
                 <input  id="searchbar" type="search" class="form-control" placeholder="Search blocks..." v-model="search"></input>
@@ -25,7 +25,7 @@
 	    <div class="btn-group space-holder" :style="{height: (open != undefined || search != '') ? '38px' : '0px'}">
                 <input  id="searchbar-space-holder" type="search" class="form-control" placeholder="Search blocks..." v-model="search" style="visibility: hidden"></input>
 	    </div>
-        <div :style="menuItem" v-for="(blocks, menu) in searched(menus)">
+        <div class="menu-card" :class="{'menu-card-open': open || search}" v-for="(blocks, menu) in searched(menus)">
             <template v-if="menu != 'Sprites & Backgrounds' && menu != 'Integrations' "> 
                 <div v-show="open == menu && !search" class="menu-header">{{ menu }}</div>
                 <button v-show="open == undefined || open != menu || search" :class="{highlight: !search}" class="all" :id="menu.split(' ')[0]" @click="toggle(menu)">{{ menu }}</button>
@@ -2180,44 +2180,6 @@
                 }
             },
             computed: {
-                menuStyles: function() {
-                    if (this.search || this.open) {
-                        return {
-                            width: "98%",
-                            marginLeft: "1%",
-                            marginBottom: "5px"
-                            
-                        }
-                    }
-                    else {
-                        return {
-                            display: "flex",
-                            flexWrap: "wrap",
-                            width: "100%",
-                            height: "100%"
-                        }
-                    }
-                },
-                menuItem: function() {
-                    if (this.search || this.open) {
-                        return {
-                            width: "98%",
-                            marginLeft: "1%",
-                            marginTop: "5px",
-                            marginBottom: "5px"
-                        }
-                    }
-                    else {
-                        return {
-                            display: "flex",
-                            flexFlow: "column wrap",
-                            width: "48%",
-                            marginLeft: "auto",
-                            marginRight: "auto",
-                            marginBottom: "5px"
-                        }
-                    }
-                },
             },
             methods: {
                 setUserUploadImages: function(images) {
