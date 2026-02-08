@@ -1,0 +1,1297 @@
+﻿<!DOCTYPE html>
+<html class="greyway" style="height:100%">
+<head>
+  <meta name="theme-color" content="#101a33">
+  <meta name="application-name" content="WoofJS Offline">
+  <meta name="description" content="Offline WoofJS studio">
+  <link rel="stylesheet" href="./vendor/external/animate/animate.min.css">
+
+  <meta charset="utf-8">
+
+  <title>WoofJS Offline Studio</title>
+  <link rel="shortcut icon" type="image/png" href="./favicon.png"/>
+  <link rel="manifest" href="./manifest.json">
+
+  <link rel="stylesheet" href="./vendor/external/jquery-ui/jquery-ui.min.css">
+  <script src="./vendor/external/jquery/jquery-1.12.4.min.js"></script>
+  <script src="./vendor/external/jquery-ui/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="./vendor/external/showdown/showdown.min.js"></script>
+  <link href="./vendor/external/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <script src="./vendor/external/bootstrap/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="./vendor/codemirror/codemirror.css">
+  <script type="text/javascript" src="./vendor/codemirror/codemirror.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/javascript.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/closebrackets.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/javascript-hint.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/javascript-lint.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/matchbrackets.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/search.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/searchcursor.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/show-hint.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/comment.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/sublime.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/foldcode.js"></script>
+  <script type="text/javascript" src="./vendor/codemirror/mark-selection.js"></script>
+  <script src="./vendor/external/clipboard/clipboard.min.js"></script>
+  <link rel="stylesheet" href="./vendor/codemirror/foldgutter.css" />
+  <script src="./vendor/codemirror/foldcode.js"></script>
+  <script src="./vendor/codemirror/foldgutter.js"></script>
+  <script src="./vendor/codemirror/brace-fold.js"></script>
+  <script src="./vendor/codemirror/comment-fold.js"></script>
+  <link href="./vendor/external/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./vendor/codemirror/dialog.css">
+  <link rel="stylesheet" href="./vendor/codemirror/show-hint.css">
+  <script src="./vendor/codemirror/dialog.js"></script>
+  <link rel="stylesheet" href="./vendor/codemirror/lint.css">
+  <script src="./vendor/codemirror/jshint.min.js"></script>
+  <script src="./vendor/codemirror/lint.js"></script>
+  <script src="./vendor/levenshtein.js"></script>
+  <script src="./vendor/codemirror/scrollpastend.js"></script>
+  <link rel="stylesheet" href="./vendor/codemirror/3024-night.css">
+  <link rel="stylesheet" href="./vendor/codemirror/ambiance.css">
+  <link rel="stylesheet" href="./vendor/codemirror/base16-dark.css">
+  <link rel="stylesheet" href="./vendor/codemirror/blackboard.css">
+  <link rel="stylesheet" href="./vendor/codemirror/cobalt.css">
+  <link rel="stylesheet" href="./vendor/codemirror/eclipse.css">
+  <link rel="stylesheet" href="./vendor/codemirror/elegant.css">
+  <link rel="stylesheet" href="./vendor/codemirror/erlang-dark.css">
+  <link rel="stylesheet" href="./vendor/codemirror/lesser-dark.css">
+  <link rel="stylesheet" href="./vendor/codemirror/midnight.css">
+  <link rel="stylesheet" href="./vendor/codemirror/monokai.css">
+  <script src="./vendor/external/vue/vue.min.js"></script>
+  <script src="./vendor/external/babel/babel.min.js"></script>
+  <script src="./run-code.js"></script>
+  <script src="./vendor/external/js-beautify/beautify.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').catch(function() {});
+      });
+    }
+  </script>
+  
+  <style>
+    /* Layout only — all colours, fonts, radii, and component styles
+       come from vivid-theme.css. This block handles flex geometry. */
+
+    html, body { height: 100%; width: 100%; padding: 0; overflow: hidden; }
+
+    #page {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+
+    #navbar {
+      flex: 0 0 var(--navbar-height);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+    }
+
+    #container {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    #output, #docs, #projects, #code {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    #previewbar, #docsbar, #codebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    #PreviewNav, #DocsNav, #ProjectsNav, #CodeNav {
+      flex: 0 0 38px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .CodeMirror { flex: 1 1 auto; height: auto !important; font-size: 13px; }
+    .CodeMirror-scroll { padding-bottom: 30px; }
+
+    iframe { border: none; flex: 1 1 auto; width: 100%; height: 100%; }
+
+    .rotate { transform: rotate(90deg); white-space: nowrap; }
+
+    .redText { font-size: small; margin-right: 5px; }
+    .whiteText { font-size: smaller; margin-right: 5px; }
+
+    #navbar img { height: 36px; width: auto; }
+    .top-links { display: flex; gap: 10px; align-items: center; margin-left: 10px; }
+    #save { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+    /* Animations */
+    @keyframes glowing {
+      0%   { background-color: #B20000; box-shadow: 0 0 1px #c9302c; }
+      50%  { background-color: #FF0000; box-shadow: 0 0 2px #FF0000; }
+      100% { background-color: #B20000; box-shadow: 0 0 1px #c9302c; }
+    }
+    .shake { animation-name: shake; }
+    .animated { animation-duration: 1s; animation-fill-mode: both; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+      20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+  </style>
+  <link rel="stylesheet" href="./ui/vivid-theme.css?v=greyway2">
+</head>
+<body class="greyway">
+  <div id="app" style="display:contents">
+  <div id="page">
+    <div id="navbar">
+
+      <img id="nav-logo" style="width:160px; height: 40px;" src="./images/logowhite.png">
+      <span class="edition-badge">Greyway Edition</span>
+      <div class="top-links">
+        <button class="nav-pill" @click="outputPane = true; previewbar = false">Studio</button>
+        <button class="nav-pill" @click="docsPane = !docsPane">Docs</button>
+      </div>
+      <span style="margin:8px" id="save">
+        <button class="btn-run" onclick="createRunCode(); focusPreview()">Run</button>
+    <span id="saveDescription" v-bind:class="{ redText: ((status == 'DIRTY') && !getID()), whiteText: ((status != 'DIRTY') || getID())}">{{saveMessage}}</span>
+        <div class="dropdown" style="display:inline;">
+          <button class="btn btn-primary btn-medium dropdown-toggle" type="button" id="toolsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style='border:none;'>
+            Tools
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="toolsDropdown" style="margin-top:12px;">
+            <li><a @click="undo()"><span class="fa fa-undo"></span> Undo <span><kbd>{{shortcut}}</kbd>+<kbd>Z</kbd></span></a></li>
+            <li><a @click="redo()"><span class="fa fa-repeat"></span> Redo <span><kbd>{{shortcut}}</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a @click="copy()"><span class="fa fa-clone"></span> Copy <span><kbd>{{shortcut}}</kbd>+<kbd>C</kbd></span></a></li>
+            <li><a @click="cut()"><span class="fa fa-sticky-note-o"></span> Cut <span><kbd>{{shortcut}}</kbd>+<kbd>X</kbd></span></a></li>
+            <li><a @click="paste()"><span class="fa fa-sign-in"></span> Paste <span><kbd>{{shortcut}}</kbd>+<kbd>V</kbd></span></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a @click="selectAll()"><span class="fa fa-bars"></span> Select All <span><kbd>{{shortcut}}</kbd>+<kbd>A</kbd></span></a></li>
+            <li><a @click="find()"><span class="fa fa-search"></span> Find <span><kbd>{{shortcut}}</kbd>+<kbd>F</kbd></span></a></li>
+            <li><a @click="replace()"><span class="fa fa-search-plus"></span> Replace <span><kbd>{{shortcut}}</kbd>+<kbd>H</kbd></span></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a @click="cleanCode()" :style="{display: canClean ? 'block' : 'none'}"><span class="glyphicon glyphicon-align-left"></span> Clean Code <span><kbd>{{shortcut}}</kbd>+<kbd>B</kbd></span></a></li>
+            <li class='disabled'><a @click="cleanCode()"  :style="{display: canClean ? 'none' : 'block'}" data-toggle="popover" data-trigger="hover" data-content="You can't clean when there's an error." data-placement="top"><span class="glyphicon glyphicon-align-left"></span> Clean Code <span><kbd>{{shortcut}}</kbd>+<kbd>B</kbd></span></a></li>
+            <li><a @click="comment()"><span class="fa fa-code"></span> Comment Code <span><kbd>{{shortcut}}</kbd>+<kbd>/</kbd></span></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a><input onclick="autoRunClicked()" type="checkbox" id="checkbox" v-model="autoRunChecked"></span> Auto Run</a></li>
+            <li><a><input type="checkbox" id="checkbox" v-model="autoSaveChecked"></span> Auto Save</a></li>
+            <li><a @click="share()"><span class="glyphicon glyphicon-share-alt"></span> Share</a></li>
+          </ul>
+        </div>
+        <button class="btn btn-medium btn-default" onclick="document.getElementById('importProjectInput').click()">Import</button>
+        <button class="btn btn-medium btn-default" onclick="openAssetsModal()">Assets</button>
+        <button style="display: none" :style="{display: 'inline-block'}" class="btn btn-medium btn-primary" :class="styles" onclick="save()">{{ status == "SAVED" ? (autoSaveStatus ? 'Autosaved' : 'Saved') : "Save" }}</button> 
+      </span>
+    </div>
+
+    <input id="importProjectInput" type="file" accept=".woofjs,.js,.txt" style="display:none">
+
+    <div id="container">
+
+      <div id="previewbar" v-show="previewbar" @click="previewbar= !previewbar" :style="{display: 'flex'}">
+        <span class="rotate" style="font-size: 1.65em">Preview</span>
+      </div>
+      <div v-show="outputPane" :style="{display: !previewbar ? 'flex' : 'none'}" id="output">
+        <div id="PreviewNav">
+          <span style="margin-left:8px; margin-top:4px">Preview</span>
+          <span style="margin-right:8px">
+            <span style="display: none; font-family: monospace; font-size: 11px" :style="{display: status ? 'inline-block' : 'none'}">mouseX: {{mouseX}}</span>
+            <span style="display: none; font-family: monospace; font-size: 11px" :style="{display: status ? 'inline-block' : 'none'}">mouseY: {{mouseY}}</span>
+            <img onclick="createRunCode(); focusPreview()" id="pop" style="margin: 2px; width: 17px; height:17px" src="./images/refresh.png" title="Reload">
+            <img  onclick="popout()" id="pop" style="margin: 2px; width: 17px; height:17px" src="./images/pop.png" title="Open in new tab">
+            <img  @click="previewbar = !previewbar"  style="margin: 5px; width: 16px; height:18px; cursor:pointer" src="./images/minimize.png" title="Minimize">
+          </span>
+        </div>
+        <iframe scrolling="no" id="preview"></iframe>
+      </div>
+     
+      <div id="docsbar" v-show="docsbar" @click="docsbar= !docsbar" :style="{display: 'flex'}">
+        <span class="rotate" style="font-size: 1.65em">Documentation</span>
+      </div>
+      <div v-show="docsPane" :style="{display: !docsbar ? 'flex' : 'none'}" id="docs">
+        <div id="DocsNav">
+          <span style="margin-left:8px;  margin-top:4px">Documentation</span>
+          <span style="margin-right:8px">
+            <img   @click="docsbar = !docsbar"  style="margin-left:5px; width: 16px; height:18px; cursor:pointer" src="./images/minimize.png"  title="Minimize">
+          </span>
+        </div>
+        <iframe src="./docs/index.html?v=greyway3" id="scratch"></iframe>
+      </div>
+
+
+      <div id="codebar" v-show="codebar" @click="codebar= !codebar" :style="{display: 'flex'}">
+        <span class="rotate" style="font-size:1.65em">Code</span>
+      </div>
+      <div v-show="codePane" :style="{display: !codebar ? 'flex' : 'none'}" id="code" :class="{errorCursorStyle : cursorOnErrorLine}">
+        <div id="CodeNav">
+          <div>
+            <span style="margin-left:8px; margin-top:4px">Code</span>
+            <select :value ="selectedTheme" class="form-control" style="display: inline; width: auto; height: 18px; margin-top: 4px; padding: 0 4px; font-size: 11px;" @change="themeChange($event)">
+              <option>monokai</option>
+              <option>cobalt</option>
+              <option>ambiance</option>
+              <option>blackboard</option>
+              <option>erlang-dark</option>
+              <option>lesser-dark</option>
+              <option>eclipse</option>
+              <option>3024-night</option>
+              <option>base16-dark</option>
+              <option>elegant</option>
+              <option>midnight</option>
+              <option>night</option>
+            </select>
+          </div>
+    <div>
+      <span>
+        <button id="code-status" class="btn" :style="{animation: error ? 'glowing 1200ms infinite' : 'none'}" @click="errorReport = !errorReport">{{error ? "Error " : "Running "}}<span class="caret" v-if="errorReport"></span><span class="caret caret-right" v-else></span></button>
+      </span>
+            <span style="margin-right:8px">
+              <img @click="codebar = !codebar" style="margin: 5px; width: 16px; height:18px; cursor:pointer" src="./images/minimize.png" title="Minimize">
+            </span>
+          </div>
+        </div>
+        <div id="error-block" :style="{display: (error && errorReport) ? 'block' : 'none'}" class="alert alert-danger fade in">There's a problem<span v-if="errorLineNumber"> on <a @click="goToErrorLine">line {{errorLineNumber}}</a></span>.
+          <p><code>{{errorMessage}}</code></p>
+          <div v-if="renameSprite"><p>You need to rename {{oldSpriteName}}. What would you like to name it?</p><input @keyup.enter="getSpriteName" class="form-control" type="text" v-model="spriteName" placeholder="Enter sprite name"><button class="btn btn-danger" @click="getSpriteName">Enter</button>
+          </div>
+          <div v-if="suggestions.length > 0">You may be looking for: <a v-for="suggestion in suggestions" @click="replaceMisspelledWord(suggestion)"><code>{{suggestion}}</code></a></div>
+    </div>
+      </div>
+     
+    </div>
+  </div>
+
+  <!-- ═══ MODALS (outside #page to avoid stacking-context trap) ═══ -->
+
+  <div class="modal fade" id="saveModal" tabindex="-1" role="dialog" aria-labelledby="saveModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="saveModalLabel">Choose a name for your project</h4>
+        </div>
+        <div class="modal-body">
+          <div id="projectNameGroup" class="form-group" :class="{'has-info': projectNameInputValue == '', 'has-error': projectNameRequest == 'NAME TAKEN', 'has-success': projectNameInputValue != '' && projectNameRequest != 'NAME TAKEN', animated: projectNameRequest == 'NAME TAKEN' || projectNameLastKeyIllegal, shake: projectNameRequest == 'NAME TAKEN' || projectNameLastKeyIllegal}">
+            <input type="text" class="form-control" id="projectName" placeholder="my-project" :value="projectNameInputValue" @input="validate($event)" @keyDown.enter="saveName(projectNameInputValue)">
+            <span id="nameTaken" :style="{opacity: projectNameRequest == 'NAME TAKEN' ? '1' : '0'}" class="text-danger">That project name has already been taken. Try another one.</span>
+          </div>
+          <span id="illegalCharacter" class="text-danger" :class="{animated: projectNameLastKeyIllegal, shake: projectNameLastKeyIllegal}" style="display: inline-block" :style="{opacity: projectNameLastKeyIllegal ? '1' : '0'}">You cannot include {{ projectNameLastKeyIllegal }} in project names.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" @click="popoutAfterSave=false">Close</button>
+          <button type="button" id="saveChanges" class="btn btn-primary" :class="{disabled: projectNameRequest != 'NOT LOADING' || projectNameInputValue == ''}" @click="saveName()">{{ projectNameRequest == "LOADING" ? "Loading..." : "Save" }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="shareModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><span class="glyphicon glyphicon-share-alt"></span> Share this project</h4>
+        </div>
+        <h4 class="modal-body text-danger" :style="{display: !getID() ? 'block' : 'none'}">You must save a project in order to share it.</h4>
+        <div class="modal-body" :style="{display: getID() ? 'block' : 'none'}">
+          <div class="form-group">
+            <label for="link">Code & Output</label>
+            <input type="text" class="form-control" id="link" :value="link()">
+          </div>
+          <div class="form-group">
+            <label for="fullLink">Full Screen Output</label>
+            <input type="text" class="form-control" id="fullLink" :value="fullLink()">
+          </div>
+          <div class="form-group">
+            <label for="embed">Embed</label>
+            <input type="text" class="form-control" id="embed" :value="embed()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="assetsModal" tabindex="-1" role="dialog" aria-labelledby="assetsModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="assetsModalLabel">Offline Assets</h4>
+        </div>
+        <div class="modal-body">
+          <p>Upload images/audio. Use the generated URL in your code (e.g. <code>setBackdropURL('data:...')</code>).</p>
+          <label id="assetDrop" class="asset-drop">
+            <input id="assetInput" type="file" multiple>
+            <div class="asset-drop-title">Drop files here or click to upload</div>
+            <div class="asset-drop-sub">PNG, JPG, GIF, MP3, WAV • Max 2MB each</div>
+          </label>
+          <hr>
+          <div v-if="assets.length === 0">No assets yet.</div>
+          <div class="asset-list">
+            <div v-for="asset in assets" class="asset-item">
+              <img v-if="asset.url.startsWith('data:image')" :src="asset.url" class="asset-thumb">
+              <div class="asset-meta">
+                <strong v-if="asset.id !== renamingAssetId" @dblclick="startRename(asset)">{{asset.name}}</strong>
+                <input v-else class="asset-rename-input" :value="asset.name" @keydown.enter="finishRename(asset, $event)" @keydown.esc="renamingAssetId = null" @blur="finishRename(asset, $event)" ref="renameInput">
+                <div class="asset-url">{{asset.url.length > 60 ? asset.url.substring(0, 60) + '...' : asset.url}}</div>
+              </div>
+              <div class="asset-actions">
+                <button class="btn btn-xs btn-success" @click="useAsset(asset)" title="Insert into code at cursor">Use</button>
+                <button class="btn btn-xs btn-default" @click="startRename(asset)" title="Rename this asset">Rename</button>
+                <button class="btn btn-xs btn-default" @click="copyStringToClipboard(asset.url)">Copy URL</button>
+                <button class="btn btn-xs btn-danger" @click="removeAsset(asset.id)">Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- #app -->
+
+  <script>
+
+    var getID = function() {
+      // returns the name of a project, not including the current revision
+      return window.location.hash.substring(1, window.location.hash.length).split("/")[0];
+    }
+    var getIDWithRevision = function() {
+      // returns the name of a project, inlcuding the current revision
+      return window.location.hash.substring(1, window.location.hash.length);
+    }
+    var currentHash = window.location.hash
+    var OFFLINE_PROJECTS_KEY = "woofjs-offline-projects"
+    var OFFLINE_THEME_KEY = "woofjs-offline-theme"
+    var OFFLINE_ASSETS_KEY = "woofjs-offline-assets"
+
+    function loadOfflineProjectsMap() {
+      try {
+        return JSON.parse(localStorage.getItem(OFFLINE_PROJECTS_KEY) || "{}")
+      } catch (e) {
+        return {}
+      }
+    }
+
+    function saveOfflineProjectsMap(data) {
+      localStorage.setItem(OFFLINE_PROJECTS_KEY, JSON.stringify(data))
+    }
+
+    function listOfflineProjects() {
+      var data = loadOfflineProjectsMap()
+      var list = []
+      Object.keys(data).forEach(function(key) {
+        list.push({ key: key, time: data[key].updated || 0 })
+      })
+      list.sort(function(a, b) { return b.time - a.time })
+      return list
+    }
+
+    function saveOfflineProject(name, code) {
+      var data = loadOfflineProjectsMap()
+      data[name] = { code: code, updated: Date.now() }
+      saveOfflineProjectsMap(data)
+    }
+
+    function getOfflineProject(name) {
+      var data = loadOfflineProjectsMap()
+      return data[name]
+    }
+
+    function downloadProjectFile(name, code) {
+      var safeName = (name || "woofjs-project").replace(/[^a-z0-9-_]/gi, "_")
+      var blob = new Blob([code], { type: "text/plain" })
+      var url = URL.createObjectURL(blob)
+      var a = document.createElement("a")
+      a.href = url
+      a.download = safeName + ".woofjs"
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    }
+
+    function loadOfflineAssets() {
+      try {
+        return JSON.parse(localStorage.getItem(OFFLINE_ASSETS_KEY) || "[]")
+      } catch (e) {
+        return []
+      }
+    }
+
+    function saveOfflineAssets(list) {
+      localStorage.setItem(OFFLINE_ASSETS_KEY, JSON.stringify(list))
+    }
+
+    function openModalById(id) {
+      var modal = document.getElementById(id)
+      if (!modal) return
+      if (window.jQuery && window.jQuery.fn && window.jQuery.fn.modal) {
+        window.jQuery(modal).modal('show')
+        return
+      }
+      modal.style.display = 'block'
+      modal.classList.add('in')
+      modal.setAttribute('aria-hidden', 'false')
+      document.body.classList.add('modal-open')
+      if (!document.querySelector('.modal-backdrop')) {
+        var backdrop = document.createElement('div')
+        backdrop.className = 'modal-backdrop in'
+        document.body.appendChild(backdrop)
+      }
+    }
+
+    function closeModalById(id) {
+      var modal = document.getElementById(id)
+      if (!modal) return
+      if (window.jQuery && window.jQuery.fn && window.jQuery.fn.modal) {
+        window.jQuery(modal).modal('hide')
+        return
+      }
+      modal.style.display = 'none'
+      modal.classList.remove('in')
+      modal.setAttribute('aria-hidden', 'true')
+      document.body.classList.remove('modal-open')
+      var backdrop = document.querySelector('.modal-backdrop')
+      if (backdrop) backdrop.remove()
+    }
+
+    function openAssetsModal() {
+      openModalById('assetsModal')
+    }
+
+    function startupFail(message) {
+      var target = document.getElementById("code") || document.body
+      var div = document.createElement("div")
+      div.style.padding = "16px"
+      div.style.background = "rgba(255, 107, 107, 0.12)"
+      div.style.border = "1px solid rgba(255, 107, 107, 0.35)"
+      div.style.color = "#ffdede"
+      div.textContent = "Startup error: " + message
+      target.innerHTML = ""
+      target.appendChild(div)
+    }
+
+    if (typeof Vue === "undefined") {
+      startupFail("Vue failed to load.")
+    }
+    if (typeof CodeMirror === "undefined") {
+      startupFail("CodeMirror failed to load.")
+    }
+    if (typeof js_beautify === "undefined") {
+      startupFail("js-beautify failed to load.")
+    }
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        code: "",
+        status: "NEW",
+        error: undefined,
+        projects: [],
+        codePane: true,
+        outputPane: true,
+        docsPane: true,
+        previewbar: false,
+        docsbar:false,
+        codebar:false,
+        errorReport: false,
+        mouseX: 0,
+        mouseY: 0,
+        errorLineNumber: undefined,
+        renameSprite: false,
+        oldSpriteName: '',
+        spriteName: '',
+        suggestions: [],
+        errorMessage: '',
+        cursorOnErrorLine: false,
+        selectedTheme:'eclipse',
+        saveMessage: '',
+        saveInterval: 0,
+        autoSaveStatus: false,
+        autoSaveProgress: 0,
+        autoSaveEndOfClass: 0, // to keep track of setTimeout that saves at :25 and :55
+        autoSaveTimeout: 0,
+        autoSaveChecked: true,
+        autoSaveAfterChanges: 10, // how many (debounced) changes will trigger an autosave
+        autoSaveAfterTime: 300000, // how long to schedule an autosave for (in ms, currently 5 mins)
+        autoRunChecked: true,
+        shortcut: CodeMirror.keyMap["default"] == CodeMirror.keyMap.macDefault ? 'Cmd' : 'Ctrl',      
+        projectNameRequest: "NOT LOADING", // or "LOADING" or "NAME TAKEN"
+        projectNameInputValue: "",
+        projectNameLastKeyIllegal: false,
+        popoutAfterSave: false,
+        copiedText: "",
+        assets: loadOfflineAssets(),
+        renamingAssetId: null
+      },
+      computed: {
+        styles : function() { return {
+           // styles for the "Save" button
+          'btn-warning': this.status == 'DIRTY',
+          'btn-success': this.status == 'SAVED',
+          'btn-default': this.status == 'NEW',
+        } },
+        canClean: function(){
+          return !this.error 
+        },
+      },
+      methods: {
+        getID: getID,
+        processError: function() {
+          this.suggestions = []
+          this.errorMessage = []
+          this.renameSprite = false
+          let lineNum = -1; // for extracting line number from messages (initially added for loop busting)
+          // Remove error line highlight
+          if (this.errorLineNumber) {
+            editor.removeLineClass(this.errorLineNumber - 1, 'text', 'error-highlight');
+          }
+          if (this.error.message.includes("Uncaught ReferenceError") || (this.error.message.includes("Uncaught TypeError") && (!this.error.message.includes('A loop ran for too long')))) {
+            // Remove 'Uncaught..' from error message
+            this.errorMessage = this.error.message.split(" ").slice(2).join(" ");
+            // If error message is 'VAR not defined', ask user to rename VAR
+            this.renameSprite = /^Uncaught ReferenceError: ([a-zA-Z_$][a-zA-Z0-9_$]*) is not defined$/.exec(this.error.message)
+            if (this.renameSprite != null) {
+              this.oldSpriteName = this.renameSprite[1]
+              this.renameSprite = true
+            } else {
+              this.renameSprite = false
+            }
+            // Get alphanumeric user code
+            var userCode = editor.getValue().replace(/(?:https?|ftp?|\.\/)[\n\S]+/g,'').match(/[a-zA-Z0-9]+/g);
+            // Add Woof methods to the user code 
+            userCode.push("onKeyDown", "onMouseDown", "onMouseUp", "onMouseMove", "penDown", "Image", "Rectangle", "Polygon", "Circle", "Line", "Oval", "move", "turnRight", "turnLeft", "angle", "pointTowards", "setRotationStyle", "show", "hide", "sendToFront", "sendToBack", "play", "Audio", "clearPen", "penUp", "penDown", "Text", "remove", "includes", "forEach", "find", "setBackdropURL", "setBackdropStyle", "after", "every", "repeat", "forever", "if", "else", "mouseX", "mouseY", "repeatUntil", "when", "freeze", "defrost", "delete", "remove", "push", "throttle", "mouseOver", "randomX", "randomY", "touching", "distanceTo", "prompt", "alert", "keysDown", "mouseDown", "pMouseX", "pMousecY", "mouseXSpeed", "mouseYSpeed", "hour", "hourMilitary", "minute", "second", "dayOfMonth", "dayOfWeek", "month", "year", "mobile", "random", "randomColor", "between", "substring", "round", "sqrt", "abs", "floor", "ceiling", "importCodeURL", "timer", "resetTimer", "minX", "maxX", "minY", "maxY")
+            // Search user code for suggestions
+            for (var i = 0; i < userCode.length; i++) {
+              // Measure the difference between error and user code
+              var distance = window.Levenshtein.get(this.findMisspelledWord(this.errorMessage), userCode[i]);
+              // Add user code with a distance less than 3 to list of suggestions if it hasn't already been added, it isn't the error, it's longer than a character, and it isn't a numnber
+              if (distance < 3 && distance != 0 && this.suggestions.indexOf(userCode[i]) == -1 && userCode[i].length > 1 && isNaN(userCode[i])) {
+                this.suggestions.push(userCode[i]);
+              }
+            }
+          }
+      else if (this.error.message.includes('A loop ran for too long')) {
+        var errorDesc = this.error.message.split("\n");
+        if (errorDesc[0].includes("Uncaught TypeError:")) {
+          errorDesc[0] = errorDesc[0].substr(20)
+          lineNum = parseInt(errorDesc[1])
+        }
+        this.errorMessage = errorDesc[0];
+      } else {
+            // Split error message by line break
+        var errorDesc = this.error.message.split("\n");
+            // Display first line of error message
+            // Remove 'unknown' from first line if it exists
+            var t = errorDesc[0].split(" ");
+            this.errorMessage += t[0] == "unknown:" ? t.slice(1, t.length - 1).join(" ") : this.errorMessage += errorDesc[0];
+            // Find error line number if it is undefined
+            if (!this.error.lineno) {
+              var x = errorDesc[0].slice(errorDesc[0].indexOf(":") + 2);
+              this.error.lineno = x.slice(x.indexOf("(") + 1, x.indexOf(":"));
+            }
+          }
+          // Show error line number if it is accurate
+          if (this.error.lineno <= editor.lineCount() && lineNum == -1) {
+            this.errorLineNumber = this.error.lineno;
+            // Add highlight to error line
+            editor.addLineClass(this.errorLineNumber - 1, 'text', 'error-highlight');
+      } else if (lineNum != -1) {
+        this.errorLineNumber = lineNum;
+        editor.addLineClass(this.errorLineNumber - 1, 'text', 'error-highlight');
+      } else {
+            this.errorLineNumber = undefined
+          }
+        },
+        // Find misspelling in user code
+        findMisspelledWord: function(typo) {
+          return typo.split(" ")[0].split(".").pop();
+        },
+        // Change user code if user clicks suggestion
+        replaceMisspelledWord: function(x) {
+          editor.setValue(editor.getValue().replace(new RegExp("\\b" + this.findMisspelledWord(this.errorMessage) + "\\b", 'g'), x));
+        },
+        // Rename unrecognize var name with user input
+        getSpriteName: function() {
+      // Make a regex that finds all instances of the variable to replace
+      let re = new RegExp(`\\b${this.oldSpriteName}\\b`, 'g');
+          editor.setValue(editor.getValue().replace(re, this.spriteName));
+          this.spriteName = '';
+          this.renameSprite = false;
+        },
+        // Go to error line
+        goToErrorLine: function() {
+          editor.scrollIntoView({line: this.errorLineNumber, ch:0}, editor.getScrollInfo().clientHeight / 2);
+        },
+        cleanCode: function(){
+      if (!this.error) {
+        if (editor.getSelection() == ""){
+          editor.execCommand("selectAll");
+        }
+        var beautiful = js_beautify(editor.getSelection(), {space_after_anon_function: true, indent_size: 2, indent_with_tabs: false })
+        editor.replaceSelection(beautiful)
+      }
+        },
+        removeAsset: function(id) {
+          var nextAssets = this.assets.filter(a => a.id !== id)
+          this.assets = nextAssets
+          saveOfflineAssets(nextAssets)
+        },
+        useAsset: function(asset) {
+          // Build a useful snippet based on file type
+          var url = asset.url
+          var snippet
+          if (url.startsWith('data:image')) {
+            snippet = "setBackdropURL('" + url + "')"
+          } else if (url.startsWith('data:audio')) {
+            snippet = "var sound = new Audio('" + url + "')\nsound.play()"
+          } else {
+            snippet = "'" + url + "'"
+          }
+          // Insert at cursor in CodeMirror and close modal
+          editor.replaceRange(snippet, editor.getCursor())
+          editor.focus()
+          $('#assetsModal').modal('hide')
+        },
+        startRename: function(asset) {
+          this.renamingAssetId = asset.id
+          var self = this
+          this.$nextTick(function() {
+            var inputs = document.querySelectorAll('.asset-rename-input')
+            if (inputs.length) {
+              var input = inputs[inputs.length - 1]
+              input.focus()
+              input.select()
+            }
+          })
+        },
+        finishRename: function(asset, event) {
+          var newName = (event.target.value || '').trim()
+          if (newName && newName !== asset.name) {
+            asset.name = newName
+            saveOfflineAssets(this.assets)
+          }
+          this.renamingAssetId = null
+        },
+        share: function(){
+          openModalById('shareModal')
+        },
+        link: function(){
+          return window.location.origin + window.location.pathname + "#" + getID()
+        },
+        fullLink: function(){
+          return window.location.origin + "/full.html#" + getID()
+        },
+        copyStringToClipboard: function(str) {
+          // Create new element
+          this.copiedText = str;
+          var el = document.createElement('textarea');
+          // Set value (string to be copied)
+          el.value = str;
+          // Set non-editable to avoid focus and move outside of view
+          el.setAttribute('readonly', '');
+          el.style = {position: 'absolute', left: '-9999px'};
+          document.body.appendChild(el);
+          // Select text inside element
+          el.select();
+          // Copy text to clipboard
+          document.execCommand('copy');
+          // Remove temporary element
+          document.body.removeChild(el);
+        },
+        embed: function(){
+          return "<iframe src=\"" + window.location.origin + "/full.html#" + getID() + "\">\n</iframe>"
+        },
+        selectAll: function(){
+          editor.execCommand("selectAll")
+        },
+        undo: function(){
+          editor.execCommand("undo")
+        },
+        redo: function(){
+          editor.execCommand("redo")
+        },
+        find: function(){
+          editor.execCommand("find")
+        },
+        replace: function(){
+          editor.execCommand("replace")
+        },
+        comment: function(){
+          editor.toggleComment()
+        },
+        copy: function(){
+          this.copyStringToClipboard(editor.getSelection())
+        },
+        cut: function(){
+          this.copyStringToClipboard(editor.getSelection())
+          editor.replaceSelection("")
+        },
+        paste: function(){
+          editor.replaceSelection(this.copiedText)
+        },
+        validate: function($event) {
+          var newName = $event.target.value
+
+          this.projectNameRequest = 'NOT LOADING'  // reset state so that you can hit save after you change the name after you get a NAME TAKEN error
+
+          this.projectNameLastKeyIllegal = false // take off the animation
+          setTimeout(function() {
+            var lastKeyPressIllegal = newName.length > 0 && newName[newName.length - 1].match(/\.|#|\$|\/|\[|\]/)
+            if (lastKeyPressIllegal) {
+              this.projectNameLastKeyIllegal = lastKeyPressIllegal[0]
+            } else {
+              this.projectNameLastKeyIllegal = false
+            }
+          }.bind(this), 10)
+
+
+          this.projectNameInputValue = newName.replace(/ /g, "-")
+          this.projectNameInputValue = this.projectNameInputValue.replace(/\.|#|\$|\/|\[|\]/g, "")
+        },
+        saveName : function() {
+          if (app.projectNameRequest == "NOT LOADING"){
+            app.projectNameRequest = "LOADING"
+            var name = app.projectNameInputValue
+            if (name) {
+              saveProject(name);
+            }
+          }
+        },
+        themeChange: function (event){
+          var newTheme = event.target.value;
+          app.selectedTheme = newTheme;
+          editor.setOption("theme", newTheme);
+          localStorage.setItem(OFFLINE_THEME_KEY, newTheme)
+        },
+      }
+    })
+    
+    // Initalizes the popover for the comment code button in the tools menu
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+
+    var clipboard = new Clipboard('.btn-clipboard');
+    Vue.nextTick(function() {
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger: 'manual'
+        });
+        clipboard.destroy()
+        clipboard = new Clipboard('.btn-clipboard');
+        clipboard.on('success', function(e) {
+            $(e.trigger).tooltip('show')
+            setTimeout(function() {
+                $(e.trigger).tooltip('hide')
+            }, 1000)
+        });
+
+    })
+    
+    scratch.src = scratch.src // the documentation sometimes doesn't load unless you remind it to here, strange VueJS bug
+    // Tutorials panel removed; no projects iframe to refresh.
+    
+    var makeClean = function() {
+      app.status = "SAVED"
+      currentHash = window.location.hash
+    }
+
+    var makeDirty = function() {
+      app.status = "DIRTY"
+    }
+
+    var popout = function() {
+      if (app.status == "SAVED"){
+        window.open("./full.html#" + getIDWithRevision(), "_blank")
+      } else {
+        // remember this save was initiated by clicking popout, so we remember to open the popout after saving is completed
+        app.popoutAfterSave = true;
+        save();
+      }
+    }
+
+    // set the text in the editor
+    var editorVal = "setBackdropURL('./images/outerspace.jpg')\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+    if (getID() != ''){
+      editorVal = "// Loading..."
+      var offlineProject = getOfflineProject(getID())
+      if (offlineProject && offlineProject.code) {
+        editorVal = offlineProject.code
+        makeClean()
+      } else {
+        alert("Could not find a local project with the name: " + getID())
+        editorVal = ""
+      }
+    }
+
+    // we add the project name to the hash on save
+    // this code prevents that from triggering a page reload
+    window.addEventListener("hashchange", function() {
+      if (currentHash != window.location.hash) {
+        window.location.reload()
+      }
+    })
+
+    var saveProject = function(name){
+      var code = editor.getValue()
+      saveOfflineProject(name, code)
+      downloadProjectFile(name, code)
+      window.location.hash = name
+      app.projectNameRequest = "NOT LOADING"
+      app.projects = listOfflineProjects()
+      makeClean()
+      if (app.saveInterval) {
+        clearInterval(app.saveInterval)
+      }
+      app.saveMessage = app.autoSaveStatus ? "Autosaved Just Now" : "Saved Just Now"
+      app.autoSaveProgress = 0
+      app.autoSaveTimeout = 0
+      let saveTime = 0
+      app.saveInterval = setInterval(() => {
+        saveTime++
+        app.saveMessage = (saveTime == 1 ? "1 Minute Ago" : saveTime + " Minutes Ago")
+        app.saveMessage = app.autoSaveStatus ? "Autosaved " + app.saveMessage : "Saved " + app.saveMessage
+      }, 60000)
+      app.autoSaveStatus = false
+      closeModalById('saveModal')
+    }
+
+    var save = function(){
+      if (app.status == "SAVED") { return }
+
+      if (editor.getValue().startsWith("// Loading...")){
+        return // don't allow students to save projects that haven't loaded
+      }
+
+      if (getID()) {
+        app.projectNameInputValue = getID()
+      } else {
+        app.projectNameInputValue = autoIncrimentedName()
+      }
+      openModalById('saveModal')
+    }
+
+    var hasBootstrapModal = !!(window.jQuery && window.jQuery.fn && window.jQuery.fn.modal)
+    if (hasBootstrapModal) {
+      window.jQuery('.modal').on('shown.bs.modal', function () {
+        window.jQuery('#projectName').focus()
+      })
+    }
+    if (!hasBootstrapModal) {
+      document.addEventListener('click', function(e) {
+        var dismiss = e.target.closest && e.target.closest('[data-dismiss="modal"]')
+        if (dismiss) {
+          var targetModal = dismiss.closest('.modal')
+          if (targetModal) {
+            closeModalById(targetModal.id)
+          }
+        }
+      })
+    }
+
+    var autoIncrimentedName = function() {
+      var projName = getID();
+      var versionNumber = parseInt(projName[projName.length-1])
+      if (!isNaN(versionNumber) && projName[projName.length-2] == "-"){
+        versionNumber += 1;
+        return projName.substring(0, projName.length-1) + versionNumber.toString();
+      } else {
+        return projName + "-1";
+      }
+    }
+
+    // keyboard shortcuts
+    var mac = CodeMirror.keyMap["default"] == CodeMirror.keyMap.macDefault;
+    var ctrl = mac ? "Cmd-" : "Ctrl-";
+    var keymap = {}
+    keymap[ctrl + "B"] = function(cm) {
+      app.cleanCode()
+    }
+    keymap.Tab = function(cm) {
+      if (cm.somethingSelected()) {
+        cm.indentSelection("add")
+      } else {
+        var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+        cm.replaceSelection(spaces, "end", "+input");
+      }
+    }
+
+    var editor = CodeMirror(document.getElementById('code'), {
+        mode:  "javascript",
+        value: editorVal,
+        lineNumbers: true,
+        lineWrapping: false,
+        tabSize: 2,
+        indentUnit: 2,
+        indentWithTabs: false,
+        electricChars: true,
+        keyMap: "sublime",
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        autofocus: true,
+        smartIndent: true,
+        foldGutter: true,
+        gutters: ["CodeMirror-lint-markers", "CodeMirror-foldgutter"],
+        extraKeys: keymap,
+        lint: {
+          delay: 800,
+          options: {
+            "esnext": true,
+            "asi": true
+          }
+        },
+        // Added to allow users to see if highlighted error line is selected.
+        styleSelectedText: true
+    });
+
+    app.code = editor.getValue()
+
+    var storedTheme = localStorage.getItem(OFFLINE_THEME_KEY)
+    if (storedTheme) {
+      app.selectedTheme = storedTheme
+      editor.setOption("theme", storedTheme)
+    }
+    app.projects = listOfflineProjects()
+
+    var importInput = document.getElementById("importProjectInput")
+    if (importInput) {
+      importInput.addEventListener("change", function(e) {
+        var file = e.target.files && e.target.files[0]
+        if (!file) return
+        var reader = new FileReader()
+        reader.onload = function() {
+          editor.setValue(reader.result || "")
+          makeDirty()
+          app.saveMessage = "Imported - not saved"
+          var baseName = file.name.replace(/\.[^/.]+$/, "")
+          if (baseName) {
+            app.projectNameInputValue = baseName
+          }
+        }
+        reader.readAsText(file)
+        e.target.value = ""
+      })
+    }
+
+    function handleAssetFiles(fileList) {
+      var files = Array.prototype.slice.call(fileList || [])
+      if (!files.length) return
+      var assets = loadOfflineAssets()
+      var remaining = files.length
+      files.forEach(function(file) {
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Asset too large (max 2MB): " + file.name)
+          remaining--
+          return
+        }
+        var reader = new FileReader()
+        reader.onload = function() {
+          assets.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+            name: file.name,
+            url: reader.result
+          })
+          remaining--
+          if (remaining === 0) {
+            saveOfflineAssets(assets)
+            app.assets = assets
+          }
+        }
+        reader.onerror = function() {
+          remaining--
+          alert("Failed to read asset: " + file.name)
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+
+    var assetInput = document.getElementById("assetInput")
+    if (assetInput) {
+      assetInput.addEventListener("change", function(e) {
+        handleAssetFiles(e.target.files)
+        e.target.value = ""
+      })
+    }
+
+    var assetDrop = document.getElementById("assetDrop")
+    if (assetDrop) {
+      assetDrop.addEventListener("dragover", function(e) {
+        e.preventDefault()
+        assetDrop.classList.add("is-dragover")
+      })
+      assetDrop.addEventListener("dragleave", function() {
+        assetDrop.classList.remove("is-dragover")
+      })
+      assetDrop.addEventListener("drop", function(e) {
+        e.preventDefault()
+        assetDrop.classList.remove("is-dragover")
+        handleAssetFiles(e.dataTransfer.files)
+      })
+    }
+    
+    // Track Codemirror cursor activity
+    editor.on('cursorActivity', function(){
+      var activeLine = editor.getCursor().line + 1;
+      // If cursor is on error line, change cursor style
+      if (app.errorLineNumber && app.error) {
+        if (app.errorLineNumber == activeLine) {
+         app.cursorOnErrorLine = true;
+        }
+        else {
+         app.cursorOnErrorLine = false;
+        }
+      } 
+      else {
+        app.cursorOnErrorLine = false;
+      }
+    });
+
+    onkeydown = function(e){
+      if(e.ctrlKey && e.key == '/'){
+        e.preventDefault();
+      }
+      if((e.metaKey || e.ctrlKey) && e.keyCode == 'S'.charCodeAt(0)){
+        e.preventDefault();
+        save();
+      }
+    }
+
+    function WoofJSLint(){
+      if (app.error) { return }
+      const code = js_beautify(app.code, {space_after_anon_function: true, indent_size: 2, indent_with_tabs: false})
+      const regEx = /  ((\w)*\.)?(ready|onKeyDown|onKeyUp|onMouseDown|onMouseUp|onMouseMove|forever|repeatUntil)/g   // matches any event indented with two spaces
+      var result;
+      while ((result = regEx.exec(code)) !== null) {
+        var lineNumber = code.substring(0, result.index).split('\n').length
+        CodeMirror.commands.markGutter(editor, "warning", lineNumber, "It's usually a bad idea to have " + result[3] + "'s inside loops and other events.")
+      }
+    }
+
+    function autoRunClicked(){
+      if (!app.autoRunChecked){
+        makeDirty()
+        debouncedRunCode()
+        setTimeout(function() {WoofJSLint()}, 1000); 
+      }
+    }
+
+    // run the code (debounced) on every change to the editor 
+    editor.on("change", function(){
+      app.code = editor.getValue()
+      makeDirty()
+      if (!getID()) {
+        app.saveMessage = "Never Saved"
+      }
+      if (app.autoSaveChecked) {
+        debouncedAutoSave()
+        if (!app.autoSaveEndOfClass && getID()) {
+      let d = new Date();
+      let scheduledAutoSave = function() {
+        save();
+        app.autoSaveStatus = true;
+        app.autoSaveEndOfClass = 0;
+          }
+      let timeToAutoSave            
+      if (d.getMinutes() < 25) {
+        timeToAutoSave = (25 - d.getMinutes()) * 60 * 1000
+          } else if (d.getMinutes() < 55) {
+        timeToAutoSave = (55 - d.getMinutes()) * 60 * 1000
+      } else {
+        timeToAutoSave = (85 - d.getMinutes()) * 60 * 1000
+      }
+      app.autoSaveEndOfClass = setTimeout(scheduledAutoSave, timeToAutoSave);
+        }
+      }
+      if (app.autoRunChecked){
+        debouncedRunCode()
+        setTimeout(function() {WoofJSLint()}, 1000); 
+      }
+    });
+    createRunCode()
+
+    // focus on the preview when refreshed
+     function focusPreview() {
+       document.getElementById('preview').focus();
+     };
+
+    editor.on('inputRead', function(cm, e){
+      if (e.text.length == 1 && e.text[0].length == 1 &&  /^[a-zA-Z\.]/.test(e.text[0])) {
+        // constantly show autocomplete suggestions
+        CodeMirror.commands.autocomplete(editor);
+      }
+    });
+
+    // warns the user when they try to close the page without saving
+    window.onbeforeunload = function(e) {
+      if (app.status == "DIRTY") {
+     // this isn't actually displayed to users - modern browsers don't allow this level of control
+     //   I'm keeping this in because I'm a coward and do not want to change things
+         var dialogText = 'Make sure to copy and paste your work somewhere safe.';
+         e.returnValue = dialogText;
+
+     // this is a stupid hack that approximates attaching a callback function to the 'cancel' button
+     //   of the prompt created by this beforeUnload event. If the user allows the reload, it *should*
+     //   reload the page before this timeout has an effect. I am not fully confident this is true, but
+     //   it seems to work in the testing I have done.
+     // See issue #623 for what this is addressing
+     setTimeout(() => {
+       // set the URL back to the previously saved URL
+       window.location.hash = currentHash
+     }, 0)
+     return dialogText;
+       }
+    };
+
+    function detectScriptSupport() {
+      if (typeof window.__woofScriptAllowed !== "undefined") {
+        return window.__woofScriptAllowed
+      }
+      try {
+        var testFrame = document.createElement("iframe")
+        testFrame.style.display = "none"
+        document.body.appendChild(testFrame)
+        var doc = testFrame.contentWindow.document
+        doc.open()
+        doc.write("<script>window.__woofScriptTest = true;<\/script>")
+        doc.close()
+        var allowed = !!testFrame.contentWindow.__woofScriptTest
+        testFrame.remove()
+        window.__woofScriptAllowed = allowed
+        return allowed
+      } catch (e) {
+        window.__woofScriptAllowed = false
+        return false
+      }
+    }
+
+    function createRunCode() {
+      if (!detectScriptSupport()) {
+        app.error = {
+          message: "Scripts are blocked in this environment. This page must be opened in a context that allows running inline scripts.",
+          lineno: null
+        }
+        app.processError()
+        return
+      }
+      // Guard: If Babel isn't ready yet, wait 100ms and try again.
+      if (typeof Babel === "undefined") {
+        if (!window.__babelRetryCount) window.__babelRetryCount = 0;
+        
+        if (window.__babelRetryCount < 50) { // Try for up to 5 seconds
+          window.__babelRetryCount++;
+          setTimeout(createRunCode, 100);
+          return;
+        }
+        
+        // If it still fails after 5s, then show the error.
+        app.error = {
+          message: "Babel failed to initialize from local vendor folder. Check if babel.min.js exists.",
+          lineno: null
+        };
+        app.processError();
+        return;
+      }
+
+      // Babel is confirmed loaded, reset retry and clear errors
+      window.__babelRetryCount = 0;
+      app.error = undefined;
+
+      for (var i = 0; i < editor.lineCount(); i++) {
+        editor.removeLineClass(i, 'text', 'error-highlight');
+      }
+
+      // Refresh the iframe
+      var oldPreview = document.getElementById("preview");
+      if (oldPreview) oldPreview.remove();
+      
+      var iframe = document.createElement("iframe");
+      iframe.id = "preview";
+      iframe.scrolling = "no";
+      document.getElementById("output").appendChild(iframe);
+      
+      var iframeWindow = iframe.contentWindow;
+
+      // Track Mouse
+      iframeWindow.addEventListener("mousemove", function(event) {
+        app.mouseX = Math.round(iframeWindow.mouseX);
+        app.mouseY = Math.round(iframeWindow.mouseY);
+      });
+
+      // Handle Errors
+      iframeWindow.addEventListener("error", function(event) {
+        app.error = event.error || event;
+        app.processError();
+        if (app.error.lineno) {
+          CodeMirror.commands.markGutter(editor, "error", app.error.lineno, app.error.message);
+        }
+        event.preventDefault();
+      });
+
+      // Execute using run-code.js logic
+      runCode(iframe.contentWindow.document, editor.getValue(), (e) => {
+        app.error = e;
+        app.processError();
+      });
+    }
+    
+    function debounce(func, wait, immediate) {
+      var timeout;
+      return function() {
+        var context = this, args = arguments;
+        var later = function() {
+          timeout = null;
+          if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+      };
+    };
+    // helper function to prevent createRunCode from running too often
+    var debouncedRunCode = debounce(createRunCode, 1000, false);
+
+    // function to autosave
+    function autoSaveCheck() {
+      // only autosave when a project already has a name
+      if (getID()) {
+        if (!app.autoSaveTimeout) {
+          app.autoSaveTimeout = setTimeout(() => {
+        save()
+        app.autoSaveStatus = true
+      }, app.autoSaveAfterTime)
+        }
+        app.autoSaveProgress++
+        // save after a certain number of changes
+        if (app.autoSaveProgress >= app.autoSaveAfterChanges) {
+      save()
+      app.autoSaveStatus = true
+    }
+      }
+    }
+                
+    var debouncedAutoSave = debounce(autoSaveCheck, 1000, false);
+                  
+  </script>
+</body>
+</html>
+

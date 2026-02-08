@@ -1,0 +1,436 @@
+﻿/* ============================================================
+   WoofJS Greyway Edition — Unified Theme
+   Single source of truth for all colours, fonts, and spacing.
+   ============================================================ */
+
+:root {
+  /* Palette — matches create.html's look and feel */
+  --bg-0: #0b1020;
+  --bg-1: #101a33;
+  --panel: #121b2f;
+  --panel-2: #0f172a;
+  --panel-3: #0b1325;
+  --border: rgba(120, 140, 190, 0.22);
+  --text: #e6eefc;
+  --muted: #9cb0d9;
+  --accent: #3bd4b6;
+  --accent-2: #5f8cff;
+  --accent-3: #ffb547;
+  --danger: #ff6b6b;
+  --shadow: 0 18px 45px rgba(4, 10, 24, 0.55);
+  --glow: 0 0 0 1px rgba(62, 146, 255, 0.2), 0 12px 40px rgba(22, 45, 90, 0.5);
+
+  /* Font stack */
+  --font: "Bahnschrift", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+
+  /* Shared radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Navbar */
+  --navbar-height: 64px;
+  --navbar-bg: rgba(12, 20, 40, 0.88);
+  --navbar-border: rgba(90, 120, 190, 0.35);
+
+  /* Panel headers */
+  --header-gradient: linear-gradient(135deg, rgba(42, 62, 115, 0.8), rgba(16, 24, 48, 0.95));
+  --header-border: rgba(120, 160, 235, 0.25);
+
+  /* Body gradient */
+  --body-gradient:
+    radial-gradient(1200px 800px at 10% 10%, rgba(78, 120, 255, 0.25), transparent 60%),
+    radial-gradient(900px 700px at 85% 15%, rgba(60, 212, 182, 0.22), transparent 60%),
+    linear-gradient(135deg, var(--bg-0), var(--bg-1));
+}
+
+/* ---- Base reset ---- */
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--body-gradient);
+  color: var(--text);
+}
+
+body { position: relative; }
+
+/* Dot-grid overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shell, #page, .wrap, .card { position: relative; z-index: 1; }
+
+/* ---- Navbar / Header / Footer ---- */
+header, #navbar, footer {
+  background: var(--navbar-bg) !important;
+  border-bottom: 1px solid var(--navbar-border);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+}
+footer {
+  border-bottom: none;
+  border-top: 1px solid var(--navbar-border);
+}
+
+/* ---- Panels ---- */
+.panel, #output, #docs, #projects, #code {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.panel-header, #PreviewNav, #DocsNav, #ProjectsNav, #CodeNav {
+  background: var(--header-gradient) !important;
+  border-bottom: 1px solid var(--header-border) !important;
+  color: var(--muted) !important;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+/* ---- CodeMirror ---- */
+.CodeMirror {
+  background: var(--panel-2) !important;
+  color: var(--text) !important;
+}
+.CodeMirror-gutters {
+  background: var(--panel-3) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+/* ---- Nav pills / links ---- */
+.nav a, .nav-pill {
+  color: var(--muted) !important;
+  border: 1px solid transparent !important;
+  background: rgba(34, 50, 85, 0.6) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 14px !important;
+  transition: all 0.2s ease;
+}
+.nav a:hover, .nav-pill:hover {
+  color: var(--text) !important;
+  border-color: var(--accent) !important;
+  background: rgba(60, 212, 182, 0.15) !important;
+}
+
+/* ---- Primary / Run buttons — always green ---- */
+.primary-btn, .btn-run, #Start /*, #teachwoof */ {
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color: #05120d !important;
+  border: none !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35) !important;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+.primary-btn:hover, .btn-run:hover, #Start:hover /*, #teachwoof:hover */ {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* Secondary action buttons */
+/* #Learn, #teachwoof2, */ #demo, #FAQ {
+  background: linear-gradient(135deg, var(--accent-2), #7aa3ff) !important;
+  color: #eef2ff !important;
+  border: none !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(95, 140, 255, 0.3) !important;
+  cursor: pointer;
+}
+/* #Learn:hover, #teachwoof2:hover, */ #demo:hover, #FAQ:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* ---- Edition badge ---- */
+.edition-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Create page (create.html) specifics ---- */
+#navbar {
+  height: var(--navbar-height) !important;
+  padding: 0 20px !important;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+}
+#navbar img {
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
+}
+#navbar .top-links { gap: 12px !important; }
+
+#navbar .nav-pill,
+#navbar .btn,
+#navbar .btn-default {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 13px !important;
+  padding: 6px 14px !important;
+}
+#navbar .nav-pill:hover,
+#navbar .btn:hover {
+  background: rgba(60, 212, 182, 0.15) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+#container {
+  padding: 16px !important;
+  gap: 14px !important;
+}
+
+#PreviewNav, #DocsNav, #ProjectsNav, #CodeNav {
+  padding: 6px 12px !important;
+}
+
+/* Minimised sidebars */
+#previewbar, #docsbar, #projectbar, #codebar {
+  background: rgba(18, 27, 47, 0.85) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  flex: 0 0 32px !important;
+}
+.rotate {
+  color: #fff;
+  font-size: 13px !important;
+  letter-spacing: 0.25em;
+}
+
+/* Save / toolbar buttons */
+#save .btn,
+#save .btn-default,
+#save .btn-primary,
+#save .btn-medium {
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+}
+#save .btn-primary {
+  background: linear-gradient(135deg, var(--accent), #2ab89e) !important;
+  color: #05120d !important;
+  border: none !important;
+}
+#save .btn:hover,
+#save .btn-default:hover,
+#save .btn-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+#save .dropdown-toggle {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+#save .dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  background: rgba(10, 16, 26, 0.95) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+.dropdown-menu > li > a { color: var(--text) !important; }
+.dropdown-menu > li > a:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #fff !important;
+}
+
+#saveDescription {
+  font-size: 11px !important;
+  letter-spacing: 0.08em;
+  color: var(--muted) !important;
+}
+#saveDescription.redText { color: #fda4af !important; }
+
+#code-status {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Preview iframe */
+#output iframe, iframe#preview {
+  background: var(--bg-1) !important;
+}
+
+/* ---- Modals (Bootstrap overrides) ---- */
+.modal-content {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+.modal-header { border-bottom: 1px solid var(--border) !important; }
+.close { color: var(--text) !important; text-shadow: none !important; opacity: 0.7; }
+.form-control {
+  background: var(--bg-1) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+.form-control:focus {
+  background: var(--bg-0) !important;
+  border-color: var(--accent-2) !important;
+}
+
+/* Error block */
+#error-block {
+  background: rgba(255, 107, 107, 0.12) !important;
+  border: 1px solid rgba(255, 107, 107, 0.35) !important;
+  color: #ffdede !important;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* ---- Glass utility ---- */
+.glass {
+  background: rgba(10, 16, 26, 0.65) !important;
+  border: 1px solid var(--border) !important;
+  backdrop-filter: blur(14px);
+}
+
+/* ---- Teach page sections (teach.html) — commented out, page disabled ----
+#first, #educator, #scratch, #switch, #footer {
+  background: var(--body-gradient) !important;
+  color: var(--text) !important;
+}
+#educator p, #scratch p, #switch span, #footer p {
+  color: var(--muted) !important;
+}
+#compare {
+  background-color: var(--bg-1) !important;
+  color: var(--text) !important;
+}
+---- */
+
+/* ---- Showcase page ---- */
+.level-container {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow);
+  color: var(--text) !important;
+  font-family: var(--font);
+}
+#art, #games {
+  background: var(--panel) !important;
+}
+.project-block > a,
+.project-block > a:hover {
+  color: var(--text) !important;
+  text-decoration: none;
+}
+.project-block > a > img {
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 12px 30px rgba(3, 8, 18, 0.4);
+}
+.start-here { color: var(--accent-3) !important; }
+.first-project { border-right-color: rgba(255, 255, 255, 0.3) !important; }
+
+/* ---- Offline info cards ---- */
+.wrap, .card {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+/* ---- Links ---- */
+a { color: #7dd3fc; }
+
+/* ---- Assets modal ---- */
+.asset-drop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(12, 18, 30, 0.6);
+  cursor: pointer;
+}
+.asset-drop input[type="file"] { display: none; }
+.asset-drop-title { font-weight: 600; color: var(--text); }
+.asset-drop-sub { font-size: 12px; color: var(--muted); }
+.asset-drop.is-dragover {
+  border-color: rgba(60, 212, 182, 0.5);
+  background: rgba(60, 212, 182, 0.08);
+}
+.asset-list { display: flex; flex-direction: column; gap: 10px; }
+.asset-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(10, 16, 26, 0.6);
+}
+.asset-meta { min-width: 0; flex: 1; overflow: hidden; }
+.asset-url {
+  font-size: 11px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+.asset-thumb {
+  width: 48px; height: 48px; object-fit: cover;
+  border-radius: 6px; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.asset-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+.asset-rename-input {
+  width: 100%; padding: 4px 8px; font-size: 13px; font-weight: 600;
+  background: var(--bg-0); color: var(--text);
+  border: 1px solid var(--accent); border-radius: var(--radius-sm);
+  outline: none;
+}
+.asset-meta strong {
+  cursor: default;
+}
+.asset-item .btn-success {
+  background: var(--accent) !important; border-color: var(--accent) !important;
+  color: var(--bg-0) !important; font-weight: 700;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 960px) {
+  body::before { opacity: 0.2; }
+}

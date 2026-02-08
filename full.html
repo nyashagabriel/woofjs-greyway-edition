@@ -1,0 +1,72 @@
+<link rel="shortcut icon" type="image/png" href="./favicon.png"/>
+<link rel="apple-touch-icon" href="./images/logo-1.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+  iframe { width: 100%; height: 100%; border: none; display: block; }
+</style>
+<script src="./vendor/external/babel/babel.min.js"></script>
+<script type="text/javascript" src="./run-code.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js').catch(function() {});
+    });
+  }
+</script>
+<script>
+  var OFFLINE_PROJECTS_KEY = "woofjs-offline-projects";
+
+  window.onhashchange = function() {
+    window.location.reload()
+  }
+  
+  var getID = function() {
+    return window.location.hash.substring(1, window.location.hash.length).split("/")[0];
+  }
+  var getCurrentRevisionCode = function(revisions) {
+    var revision = parseInt(window.location.hash.substring(1, window.location.hash.length).split("/")[1])
+    
+    var keys = Object.keys(revisions)
+    if (keys.length > 1){
+      keys = keys.slice(1, keys.length)
+    }
+    
+    
+    var key
+    if (!isNaN(revision) && (revision !== 0 && revision !== -1 * keys.length) && Math.abs(revision) < keys.length + 1){
+      if (revision < 0){
+        revision = keys.length + revision // -1 gives the previous revision
+      }
+      key = keys[revision - 1]
+    } else {
+      key = keys[keys.length - 1]
+    }
+    return revisions[key].code
+  }
+  
+  function loadOfflineProjectsMap() {
+    try {
+      return JSON.parse(localStorage.getItem(OFFLINE_PROJECTS_KEY) || "{}")
+    } catch (e) {
+      return {}
+    }
+  }
+
+  var id = getID()
+  if (!id) {
+    document.body.innerHTML = "<div style='font-family: sans-serif; padding: 24px;'>No project id provided.</div>"
+  } else {
+    var projects = loadOfflineProjectsMap()
+    if (projects[id] && projects[id].code) {
+      document.title = id
+      runCode(document, projects[id].code, (e) => {
+        console.error(e)
+      })
+    } else {
+      alert("There's no local project called '" + id + "'.")
+    }
+  }
+</script>
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="./manifest.json">
