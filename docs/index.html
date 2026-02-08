@@ -15,10 +15,12 @@
 
 <body>
     <div id="body">
+        <div class="docs-title">DOCUMENTATION</div>
         <div :style="menuStyles" id="menus">
         <div class="btn-group search">
                 <button v-show="open != undefined || search != ''" @click="search = ''; open = undefined" id="back" class="highlight btn btn-medium btn-info">Back</button>
                 <input  id="searchbar" type="search" class="form-control" placeholder="Search blocks..." v-model="search"></input>
+                <button v-show="search != '' || open != undefined" @click="search = ''; open = undefined" class="search-clear">&times;</button>
             </div>
 	    <div class="btn-group space-holder" :style="{height: (open != undefined || search != '') ? '38px' : '0px'}">
                 <input  id="searchbar-space-holder" type="search" class="form-control" placeholder="Search blocks..." v-model="search" style="visibility: hidden"></input>
@@ -32,7 +34,7 @@
                 </div>
             </template>
             <template v-else>
-                <div v-show="open == menu && !search" class="menu-header pinned">{{ menu }}</div>
+                <div v-show="open == menu && !search" class="menu-header pinned" :class="{'integrations-header': menu === 'Integrations'}">{{ menu }}</div>
                 <button v-show="open == undefined || open != menu || search" :class="{highlight: !search}" class="all" :id="menu.split(' ')[0]" @click="toggle(menu)">{{ menu }}</button>
                 <div v-show="open == menu || Object.keys(blocks).includes(open) || search" class="list" :class="{'menu-grid': (open == menu && menu == 'Integrations' && !search)}">
                     <div class="list" v-for="(blocks2, submenu) in blocks" :class="{'menu-grid-item': (open == menu && menu == 'Integrations' && !search)}">
@@ -264,6 +266,33 @@
                                 html:"<iframe src='//coding.space/woof/high_score.html' width='100%' height='500px' style='border:none;shadow:none;'></iframe>",
                                 tags:"firebase cloud storage high score integration"
                             },
+                        ],
+                        "Trig Functions":[
+                            {
+                                integrationDescription:"Use JavaScript's built-in Math object for trigonometric calculations. All trig functions use radians.",
+                                integrationDescriptionClass:"alert-info",
+                            },
+                            {html:"<hr style=\"height:7px;border:none;color:#e0e0e0;background-color:#e0e0e0;\"/>"},
+                            {
+                                description:"Basic trig functions — sine, cosine, and tangent:",
+                                code:'// Sine, Cosine, Tangent (input in radians)\nMath.sin(Math.PI / 6)   // 0.5\nMath.cos(Math.PI / 3)   // 0.5\nMath.tan(Math.PI / 4)   // 1',
+                                tags:"sin cos tan trig trigonometry math angle"
+                            },
+                            {
+                                description:"Convert between degrees and radians:",
+                                code:'// Degrees to radians\nvar radians = degrees * (Math.PI / 180)\n\n// Radians to degrees\nvar degrees = radians * (180 / Math.PI)',
+                                tags:"degrees radians convert trig trigonometry math angle"
+                            },
+                            {
+                                description:"Inverse trig functions — arcsin, arccos, arctan:",
+                                code:'// Inverse trig (returns radians)\nMath.asin(0.5)   // π/6\nMath.acos(0.5)   // π/3\nMath.atan(1)     // π/4\n\n// atan2 is great for finding angles between points\nvar angle = Math.atan2(dy, dx)',
+                                tags:"arcsin arccos arctan atan2 inverse trig trigonometry math angle"
+                            },
+                            {
+                                description:"Use trig to move a sprite in a circle:",
+                                code:'var ball = new Circle()\nball.radius = 15\nball.color = "cyan"\nvar angle = 0\n\nforever(() => {\n  ball.x = 150 * Math.cos(angle)\n  ball.y = 150 * Math.sin(angle)\n  angle += 0.02\n})',
+                                tags:"circle orbit trig trigonometry math animation"
+                            }
                         ],
                         "Custom Integrations": [
                             {

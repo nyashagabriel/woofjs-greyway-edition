@@ -422,19 +422,19 @@ h4 {
 
 
 #Weather{
-    background-color: #d5d4f0;
+    background-color: #7c5cbf;
     width:90% !important;    
 }
 #Local{
-    background-color: #b9b8e6;
+    background-color: #7c5cbf;
     width:90% !important; 
 }
 #Currency{
-    background-color: #9e9ddd;
+    background-color: #7c5cbf;
     width:90% !important;    
 }
 #Sunrise{
-    background-color: #8381d4;
+    background-color: #7c5cbf;
     width:90% !important; 
 }
 /*#Market{
@@ -446,23 +446,27 @@ h4 {
     width:90% !important;      
 }*/
 #Chuck{
-    background-color: #48487c;
+    background-color: #7c5cbf;
     width:90% !important;     
 }
 #Scientific{
-    background-color: #545390;
+    background-color: #7c5cbf;
     width:90% !important;    
 }
 #Trivia{
-    background-color: #3e3d68;
+    background-color: #7c5cbf;
     width:90% !important;     
 }
 #Firebase {
-    background-color: #282840;
+    background-color: #7c5cbf;
     width:90% !important;
 }
 #Custom{
-    background-color: #101019;
+    background-color: #7c5cbf;
+    width:90% !important;   
+}
+#Trig{
+    background-color: #7c5cbf;
     width:90% !important;   
 }
 
@@ -476,7 +480,8 @@ h4 {
 #Custom,
 #Sunrise,
 #Local,
-#Firebase {
+#Firebase,
+#Trig {
     height: 8%;
     width: 33%;
     border-radius: 10px;
