@@ -319,8 +319,9 @@
     var getID = function() {
       return window.location.hash.substring(1, window.location.hash.length);
     };
-    if (getID() != '') {
-      window.location = './create.html#' + getID();
+    var currentHash = getID();
+    if (currentHash !== '' && !window.location.pathname.includes('create.html')) {
+      window.location.replace('./create.html#' + currentHash);
     }
 
     if ('serviceWorker' in navigator) {
