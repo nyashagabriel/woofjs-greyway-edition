@@ -1,6 +1,23 @@
 ﻿<html class="greyway">
 
 <head>
+    <style>
+      /* Fix 2: Prevent flash-of-uncompiled-template (FOUC) — Vue removes
+         this attribute once it mounts, so content stays hidden until ready. */
+      [v-cloak] { display: none !important; }
+
+      /* Fix 6: Boot-failure overlay — shown by JS if Vue never mounts. */
+      #boot-error {
+        display: none;
+        position: fixed; inset: 0; z-index: 9999;
+        background: #1a1a2e; color: #e0e0e0;
+        font-family: system-ui, sans-serif;
+        padding: 40px; text-align: center;
+      }
+      #boot-error h1 { color: #ff6b6b; margin-bottom: 12px; }
+      #boot-error code { background: #2a2a3e; padding: 2px 6px; border-radius: 4px; }
+      #boot-error.visible { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    </style>
     <link href="./docs.css" rel="stylesheet" type="text/css">
     <link href="../ui/vivid-theme.css?v=greyway3" rel="stylesheet" type="text/css">
     <link href="./vivid-docs.css?v=greyway3" rel="stylesheet" type="text/css">
@@ -14,11 +31,21 @@
 </head>
 
 <body>
-    <div id="body">
+    <!-- Fix 6: Boot-failure overlay — hidden until the timeout fires (see bottom of file) -->
+    <div id="boot-error">
+      <h1>Documentation failed to load</h1>
+      <p>A required dependency did not load. Check that the <code>vendor/</code> folder
+         contains all files and that you are serving this page from a local HTTP server
+         (e.g. <code>py -m http.server 8000</code>).</p>
+      <p style="margin-top:16px;font-size:13px;color:#888;">Open DevTools → Console for details.</p>
+    </div>
+
+    <!-- Fix 2: v-cloak hides the Vue template until the app mounts -->
+    <div id="body" v-cloak>
         <div class="docs-title">DOCUMENTATION</div>
         <div id="menus" :class="{'menus-home': !open && !search, 'menus-detail': open || search}">
             <div class="btn-group search">
-                <button v-show="open != undefined || search != ''" @click="clearSearch" id="back" class="highlight btn btn-medium btn-info">Back</button>
+                <button v-show="open != undefined || search != ''" @click="goBack" id="back" class="highlight btn btn-medium btn-info">Back</button>
                 <input id="searchbar" type="search" class="form-control" placeholder="Search 450+ blocks..." v-model="search"></input>
                 <button v-show="search != '' || open != undefined" @click="clearSearch" class="search-clear">&times;</button>
             </div>
@@ -38,22 +65,53 @@
             </div>
 
             <div v-else class="docs-grid">
-                <div class="menu-card"
-                     :class="{'menu-card-open': open == menu}"
-                     v-for="(blocks, menu) in staticFlatMenus"
-                     :key="menu">
-                    <div v-show="open == menu" class="menu-header pinned">{{ menu }}</div>
-                    <button v-show="open == undefined || open != menu"
+                <div v-for="section in navSections" :key="section.key"
+                     class="menu-card"
+                     :class="{'menu-card-open': open === section.key}">
+
+                    <!-- TOP-LEVEL BUTTON (visible when no menu, or a different menu, is open) -->
+                    <button v-show="open === undefined || open !== section.key"
                             class="all"
-                            :id="menu.split(' ')[0]"
-                            @click="toggle(menu)">
-                        {{ menu }}
+                            :id="section.key.split(' ')[0]"
+                            @click="toggle(section.key)">
+                        {{ section.label }}
                     </button>
-                    <div v-show="open == menu" class="list block-container">
-                        <div v-for="(block, index) in blocks" :key="blockKey(block, index, menu)">
-                            <vue-block :block="block"></vue-block>
+
+                    <!-- ===== FLAT section (blocks directly) ===== -->
+                    <template v-if="open === section.key && !section.hasSubMenus">
+                        <div class="menu-header pinned">{{ section.label }}</div>
+                        <div class="list block-container">
+                            <div v-for="(block, index) in section.blocks" :key="blockKey(block, index, section.key)">
+                                <vue-block :block="block"></vue-block>
+                            </div>
                         </div>
-                    </div>
+                    </template>
+
+                    <!-- ===== NESTED section (sub-menus first, then blocks) ===== -->
+                    <template v-if="open === section.key && section.hasSubMenus">
+                        <div class="menu-header pinned">{{ section.label }}</div>
+
+                        <!-- Sub-menu listing (no sub selected yet) -->
+                        <div v-show="!openSub" class="menu-grid">
+                            <button v-for="sub in section.subMenus" :key="sub.key"
+                                    class="all"
+                                    :id="sub.key.split(' ')[0]"
+                                    @click="toggleSub(sub.key)">
+                                {{ sub.label }}
+                            </button>
+                        </div>
+
+                        <!-- Blocks inside selected sub-menu -->
+                        <template v-if="openSub">
+                            <div class="menu-subheader pinned">{{ openSub }}</div>
+                            <div class="list block-container">
+                                <div v-for="(block, index) in activeSubBlocks(section)" :key="blockKey(block, index, openSub)">
+                                    <vue-block :block="block"></vue-block>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
                 </div>
             </div>
         </div>
@@ -70,6 +128,10 @@
               <img v-else src="./images/pause.png" width="30" @click="stopSound(block.sound)">
             </div>
             <div v-if="block.description">{{ block.description }}</div>
+            <!-- Fix 3 (v-html safety): This content comes from the static
+                 inline menus object — NOT from any user/external input.
+                 If this ever renders user-supplied HTML, add a sanitizer
+                 (e.g. DOMPurify) to prevent XSS. -->
             <div v-if="block.html" v-html="block.html"></div>
             <div v-if="block.code">
                 <span data-toggle="tooltip" title="Copied!" :data-clipboard-text="block.code" class="btn-clipboard">Copy</span>
@@ -78,20 +140,34 @@
         </div>
     </script>
     <script>
+        // Fix 4: Use querySelector instead of brittle childNodes indexing.
         var updateColor = function(e) {
-            e.target.parentElement.nextElementSibling.childNodes[2].childNodes[0].innerHTML = '<span class="token string">"' + e.target.value + '"</span>'
-            e.target.parentElement.nextElementSibling.childNodes[0].setAttribute("data-clipboard-text", '"' + e.target.value + '"')
+            var codeContainer = e.target.parentElement.nextElementSibling
+            codeContainer.querySelector('code').innerHTML = '<span class="token string">"' + e.target.value + '"</span>'
+            codeContainer.querySelector('.btn-clipboard').setAttribute("data-clipboard-text", '"' + e.target.value + '"')
         }
         
-        var browseImages = function() {
-          document.getElementById("uploadInput").click()
+        var browseImages = function(buttonEl) {
+          var input = buttonEl && buttonEl.nextElementSibling
+          if (input && input.type === "file") {
+            input.click()
+          }
         }
         
         var uploadFile = function(files) {
           if (files.length === 1) {
-            window.top.postMessage(files[0], '*')
+            var targetOrigin = window.location.origin
+            try {
+              if (document.referrer) {
+                targetOrigin = new URL(document.referrer).origin
+              }
+            } catch (e) {}
+            window.top.postMessage(files[0], targetOrigin)
           }
         }
+        window.browseImages = browseImages
+        window.uploadFile = uploadFile
+        window.updateColor = updateColor
 
         Vue.component('vue-block', {
             template: "#block-template",
@@ -122,11 +198,41 @@
             }
         })
 
+        var clipboard = null
         var app = new Vue({
             el: '#body',
             data: {
                 search: "",
                 open: undefined,
+                openSub: null,
+                navSections: [],
+                allBlocks: [],
+                fuse: null,
+                menuOrder: [
+                    'Sprites & Backgrounds',
+                    'Motion',
+                    'Events',
+                    'Looks',
+                    'Control',
+                    'Sound',
+                    'Sensing',
+                    'Pen',
+                    'Operations',
+                    'Data',
+                    'Integrations',
+                    'More Blocks'
+                ],
+                subMenuOrder: {
+                    'Sprites & Backgrounds': [
+                        'Background', 'Image', 'Text',
+                        'Rectangle', 'Circle', 'Oval', 'Line', 'Polygon'
+                    ],
+                    'Integrations': [
+                        'Weather', 'Local Storage', 'Currency Conversion',
+                        'Sunrise and Sunset Data', 'Scientific Calculator',
+                        'Trivia', 'Firebase', 'Trig Functions', 'Custom Integrations'
+                    ]
+                },
                 menus: {
                     "Integrations": {
                         "Weather":[
@@ -525,8 +631,8 @@
                         ],
                         Image: [
                             {
-                              html: '<button class="btn btn-medium btn-info" onclick="browseImages()">Upload Image</button>' + 
-                                    '<input id="uploadInput" onchange="uploadFile(this.files)" style="display:none" type="file" name="pic" accept="image/*">',
+                              html: '<button class="btn btn-medium btn-info" onclick="browseImages(this)">Upload Image</button>' + 
+                                    '<input class="js-upload-input" onchange="uploadFile(this.files)" style="display:none" type="file" name="pic" accept="image/*">',
                               tags: "picture image custom external upload sprite"
                             },
                             {
@@ -2185,12 +2291,15 @@
                     }
                     ]
                 },
-                staticFlatMenus: {},
-                fuse: null,
-                allBlocks: []
             },
             created: function() {
-                this.rebuildFlatMenus()
+                this.rebuildNavSections()
+            },
+            mounted: function() {
+                this.refreshClipboard()
+            },
+            updated: function() {
+                this.refreshClipboard()
             },
             computed: {
                 searchResults: function() {
@@ -2201,6 +2310,21 @@
                 }
             },
             methods: {
+                refreshClipboard: function() {
+                    $('[data-toggle="tooltip"]').tooltip({
+                        trigger: 'manual'
+                    })
+                    if (clipboard) {
+                        clipboard.destroy()
+                    }
+                    clipboard = new Clipboard('.btn-clipboard')
+                    clipboard.on('success', function(e) {
+                        $(e.trigger).tooltip('show')
+                        setTimeout(function() {
+                            $(e.trigger).tooltip('hide')
+                        }, 1000)
+                    })
+                },
                 setUserUploadImages: function(images) {
                     var newImages = this.menus['Sprites & Backgrounds']['Image'].filter(
                         block => !block.userUploadImage
@@ -2215,7 +2339,7 @@
                         }
                     }))
                     this.menus['Sprites & Backgrounds']['Image'] = newImages
-                    this.rebuildFlatMenus()
+                    this.rebuildNavSections()
                 },
                 blockKey: function(block, index, menu) {
                     var keyBase = block.code || block.url || block.description || block.html || block.integrationDescription || ''
@@ -2224,29 +2348,64 @@
                     }
                     return menu + "::" + keyBase
                 },
-                rebuildFlatMenus: function() {
-                    var flat = {}
+                rebuildNavSections: function() {
+                    var sections = []
                     var all = []
+                    var self = this
+                    var orderedKeys = this.menuOrder.slice()
+                    Object.keys(this.menus).forEach(function(extraKey) {
+                        if (orderedKeys.indexOf(extraKey) === -1) {
+                            orderedKeys.push(extraKey)
+                        }
+                    })
 
-                    for (var key in this.menus) {
-                        if (key === 'Sprites & Backgrounds' || key === 'Integrations') {
-                            for (var subKey in this.menus[key]) {
-                                flat[subKey] = this.menus[key][subKey]
-                                this.menus[key][subKey].forEach(function(block) {
-                                    block._category = subKey
+                    orderedKeys.forEach(function(key) {
+                        var entry = self.menus[key]
+                        if (!entry) return
+
+                        // Nested section (has sub-categories)
+                        if (self.subMenuOrder[key]) {
+                            var subs = []
+                            var orderedSubKeys = self.subMenuOrder[key].slice()
+                            Object.keys(entry).forEach(function(extraKey) {
+                                if (orderedSubKeys.indexOf(extraKey) === -1) {
+                                    orderedSubKeys.push(extraKey)
+                                }
+                            })
+                            orderedSubKeys.forEach(function(subKey) {
+                                var blocks = entry[subKey]
+                                if (!Array.isArray(blocks)) return
+                                subs.push({ key: subKey, label: subKey, blocks: blocks })
+                                blocks.forEach(function(block) {
+                                    block._category = key + ' > ' + subKey
                                     all.push(block)
                                 })
-                            }
+                            })
+                            sections.push({
+                                key: key,
+                                label: key,
+                                hasSubMenus: true,
+                                subMenus: subs,
+                                blocks: []
+                            })
                         } else {
-                            flat[key] = this.menus[key]
-                            this.menus[key].forEach(function(block) {
+                            // Flat section (array of blocks)
+                            if (!Array.isArray(entry)) return
+                            entry.forEach(function(block) {
                                 block._category = key
                                 all.push(block)
                             })
+                            sections.push({
+                                key: key,
+                                label: key,
+                                hasSubMenus: false,
+                                subMenus: [],
+                                blocks: entry
+                            })
                         }
-                    }
+                    })
 
-                    this.staticFlatMenus = flat
+                    this.navSections = sections
                     this.allBlocks = all
                     this.fuse = new Fuse(this.allBlocks, {
                         shouldSort: true,
@@ -2258,36 +2417,71 @@
                         keys: ["tags", "code", "description"]
                     })
                 },
+                activeSubBlocks: function(section) {
+                    if (!this.openSub) return []
+                    var match = section.subMenus.filter(function(s) {
+                        return s.key === this.openSub
+                    }.bind(this))
+                    return match.length ? match[0].blocks : []
+                },
                 toggle: function(menu) {
-                    if (this.open == menu) {
+                    if (this.open === menu) {
                         this.open = undefined
-                    }
-                    else {
+                    } else {
                         this.open = menu
+                    }
+                    this.openSub = null
+                },
+                toggleSub: function(sub) {
+                    if (this.openSub === sub) {
+                        this.openSub = null
+                    } else {
+                        this.openSub = sub
                     }
                 },
                 clearSearch: function() {
                     this.search = ''
                     this.open = undefined
+                    this.openSub = null
+                },
+                goBack: function() {
+                    if (this.search) {
+                        this.search = ''
+                        return
+                    }
+                    if (this.openSub) {
+                        this.openSub = null
+                        return
+                    }
+                    this.open = undefined
                 }
             }
         })
         
-        var clipboard = new Clipboard('.btn-clipboard');
-        Vue.nextTick(function() {
-            $('[data-toggle="tooltip"]').tooltip({
-                trigger: 'manual'
-            });
-            clipboard.destroy()
-            clipboard = new Clipboard('.btn-clipboard');
-            clipboard.on('success', function(e) {
-                $(e.trigger).tooltip('show')
-                setTimeout(function() {
-                    $(e.trigger).tooltip('hide')
-                }, 1000)
-            });
+    </script>
 
-        })
+    <!-- Fix 1 + 6: Boot-failure detection.
+         If Vue (or any dependency) failed to load, the app never mounts,
+         v-cloak keeps the raw template hidden, and after a short timeout
+         we surface a visible error overlay instead of blank/broken content. -->
+    <script>
+    (function bootCheck() {
+        var deps = [
+            { name: 'jQuery',    test: typeof jQuery    !== 'undefined' },
+            { name: 'Vue',       test: typeof Vue       !== 'undefined' },
+            { name: 'Fuse',      test: typeof Fuse      !== 'undefined' },
+            { name: 'Clipboard', test: typeof Clipboard !== 'undefined' },
+            { name: 'Prism',     test: typeof Prism     !== 'undefined' }
+        ];
+        var missing = deps.filter(function(d) { return !d.test; });
+        if (missing.length) {
+            var names = missing.map(function(d) { return d.name; }).join(', ');
+            console.error('[docs boot] Missing dependencies: ' + names +
+                '. Ensure vendor/ files are present and page is served over HTTP.');
+            var el = document.getElementById('boot-error');
+            if (el) el.classList.add('visible');
+        }
+    })();
     </script>
 </body>
 
