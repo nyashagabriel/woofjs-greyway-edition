@@ -266,7 +266,7 @@ button.highlight:hover { opacity: 1 !important; }
    Integrations sub-grid (when Integrations is open)
    ============================================================ */
 .menu-grid {
-  display: grid !important;
+  display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
   align-content: start;

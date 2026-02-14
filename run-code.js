@@ -153,6 +153,29 @@ function runCode(doc, codeValue, errorCallback) {
         var base = doc.createElement("base");
         base.href = document.baseURI
         doc.body.appendChild(base);
+
+        // inject the asset() runtime helper so user code can reference
+        // uploaded assets by name instead of raw base64 data URLs
+        var assetScript = doc.createElement("script");
+        assetScript.type = "text/javascript";
+        try {
+            var stored = JSON.parse(localStorage.getItem("woofjs-offline-assets") || "[]");
+            var registry = {};
+            stored.forEach(function(a) { if (a.name && a.url) registry[a.name] = a.url; });
+            assetScript.text = "window.__woofAssets = " + JSON.stringify(registry) + ";\n" +
+                "window.asset = function(name) {" +
+                "  if (window.__woofAssets[name]) return window.__woofAssets[name];" +
+                "  console.warn('Asset not found: ' + name + '. Upload it via the Assets button.');" +
+                "  return '';" +
+                "};";
+        } catch (e) {
+            assetScript.text = "window.__woofAssets = {};" +
+                "window.asset = function(name) {" +
+                "  console.warn('Asset not found: ' + name);" +
+                "  return '';" +
+                "};";
+        }
+        doc.body.appendChild(assetScript);
 	
         // then we create a script tag with the woof code and add it to the page
         var script = doc.createElement("script");

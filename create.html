@@ -335,7 +335,7 @@
           <h4 class="modal-title" id="assetsModalLabel">Offline Assets</h4>
         </div>
         <div class="modal-body">
-          <p>Upload images/audio. Use the generated URL in your code (e.g. <code>setBackdropURL('data:...')</code>).</p>
+          <p>Upload images/audio. Reference them in your code with <code>asset('filename.png')</code>.</p>
           <label id="assetDrop" class="asset-drop">
             <input id="assetInput" type="file" multiple>
             <div class="asset-drop-title">Drop files here or click to upload</div>
@@ -349,12 +349,12 @@
               <div class="asset-meta">
                 <strong v-if="asset.id !== renamingAssetId" @dblclick="startRename(asset)">{{asset.name}}</strong>
                 <input v-else class="asset-rename-input" :value="asset.name" @keydown.enter="finishRename(asset, $event)" @keydown.esc="renamingAssetId = null" @blur="finishRename(asset, $event)" ref="renameInput">
-                <div class="asset-url">{{asset.url.length > 60 ? asset.url.substring(0, 60) + '...' : asset.url}}</div>
+                <div class="asset-url">{{ assetRef(asset) }}</div>
               </div>
               <div class="asset-actions">
                 <button class="btn btn-xs btn-success" @click="useAsset(asset)" title="Insert into code at cursor">Use</button>
                 <button class="btn btn-xs btn-default" @click="startRename(asset)" title="Rename this asset">Rename</button>
-                <button class="btn btn-xs btn-default" @click="copyStringToClipboard(asset.url)">Copy URL</button>
+                <button class="btn btn-xs btn-default" @click="copyStringToClipboard(assetRef(asset))" title="Copy asset('name') reference">Copy Ref</button>
                 <button class="btn btn-xs btn-danger" @click="removeAsset(asset.id)">Remove</button>
               </div>
             </div>
@@ -579,7 +579,7 @@
             // Get alphanumeric user code
             var userCode = editor.getValue().replace(/(?:https?|ftp?|\.\/)[\n\S]+/g,'').match(/[a-zA-Z0-9]+/g);
             // Add Woof methods to the user code 
-            userCode.push("onKeyDown", "onMouseDown", "onMouseUp", "onMouseMove", "penDown", "Image", "Rectangle", "Polygon", "Circle", "Line", "Oval", "move", "turnRight", "turnLeft", "angle", "pointTowards", "setRotationStyle", "show", "hide", "sendToFront", "sendToBack", "play", "Audio", "clearPen", "penUp", "penDown", "Text", "remove", "includes", "forEach", "find", "setBackdropURL", "setBackdropStyle", "after", "every", "repeat", "forever", "if", "else", "mouseX", "mouseY", "repeatUntil", "when", "freeze", "defrost", "delete", "remove", "push", "throttle", "mouseOver", "randomX", "randomY", "touching", "distanceTo", "prompt", "alert", "keysDown", "mouseDown", "pMouseX", "pMousecY", "mouseXSpeed", "mouseYSpeed", "hour", "hourMilitary", "minute", "second", "dayOfMonth", "dayOfWeek", "month", "year", "mobile", "random", "randomColor", "between", "substring", "round", "sqrt", "abs", "floor", "ceiling", "importCodeURL", "timer", "resetTimer", "minX", "maxX", "minY", "maxY")
+            userCode.push("onKeyDown", "onMouseDown", "onMouseUp", "onMouseMove", "penDown", "Image", "Rectangle", "Polygon", "Circle", "Line", "Oval", "move", "turnRight", "turnLeft", "angle", "pointTowards", "setRotationStyle", "show", "hide", "sendToFront", "sendToBack", "play", "Audio", "clearPen", "penUp", "penDown", "Text", "remove", "includes", "forEach", "find", "setBackdropURL", "setBackdropStyle", "after", "every", "repeat", "forever", "if", "else", "mouseX", "mouseY", "repeatUntil", "when", "freeze", "defrost", "delete", "remove", "push", "throttle", "mouseOver", "randomX", "randomY", "touching", "distanceTo", "prompt", "alert", "keysDown", "mouseDown", "pMouseX", "pMousecY", "mouseXSpeed", "mouseYSpeed", "hour", "hourMilitary", "minute", "second", "dayOfMonth", "dayOfWeek", "month", "year", "mobile", "random", "randomColor", "between", "substring", "round", "sqrt", "abs", "floor", "ceiling", "importCodeURL", "timer", "resetTimer", "minX", "maxX", "minY", "maxY", "asset")
             // Search user code for suggestions
             for (var i = 0; i < userCode.length; i++) {
               // Measure the difference between error and user code
@@ -656,16 +656,20 @@
           this.assets = nextAssets
           saveOfflineAssets(nextAssets)
         },
+        assetRef: function(asset) {
+          return "asset('" + asset.name + "')"
+        },
         useAsset: function(asset) {
-          // Build a useful snippet based on file type
+          // Build a useful snippet using short asset() references
+          var ref = this.assetRef(asset)
           var url = asset.url
           var snippet
           if (url.startsWith('data:image')) {
-            snippet = "setBackdropURL('" + url + "')"
+            snippet = "var sprite1 = new Image()\nsprite1.url = " + ref
           } else if (url.startsWith('data:audio')) {
-            snippet = "var sound = new Audio('" + url + "')\nsound.play()"
+            snippet = "var sound = new Audio(" + ref + ")\nsound.play()"
           } else {
-            snippet = "'" + url + "'"
+            snippet = ref
           }
           // Insert at cursor in CodeMirror and close modal
           editor.replaceRange(snippet, editor.getCursor())

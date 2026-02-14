@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'woofjs-offline-v2';
+﻿const CACHE_NAME = 'woofjs-offline-v3';
 const PRECACHE_URLS = [
   './create.html',
   './favicon.ico',
@@ -12,7 +12,9 @@ const PRECACHE_URLS = [
   './teach.html',
   './tutorials.offline.html',
   './woof.js',
+  './ui/vivid-theme.css',
   './docs/docs.css',
+  './docs/vivid-docs.css',
   './docs/docs.js',
   './docs/index.html',
   './docs/index.offline.html',
